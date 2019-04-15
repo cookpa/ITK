@@ -83,6 +83,9 @@ ImageMaskSpatialObject< TDimension, TPixel >
   it.GoToBegin();
   prevIt = it;
 
+  using PointsContainer = typename BoundingBoxType::PointsContainer;
+  typename PointsContainer::Pointer maskBoundPoints = PointsContainer::New();
+
   bool first = true;
   PixelType outsideValue = NumericTraits< PixelType >::ZeroValue();
   PixelType value = outsideValue;
@@ -90,6 +93,7 @@ ImageMaskSpatialObject< TDimension, TPixel >
   IndexType tmpIndex;
   PointType tmpPoint;
   int count = 0;
+  int pointsAdded = 0;
   int rowSize
     = this->GetImage()->GetLargestPossibleRegion().GetSize()[0];
   while ( !it.IsAtEnd() )
@@ -107,6 +111,7 @@ ImageMaskSpatialObject< TDimension, TPixel >
         tmpIndex = it.GetIndex();
         }
       this->GetImage()->TransformIndexToPhysicalPoint( tmpIndex, tmpPoint );
+      maskBoundPoints->InsertElement(pointsAdded++, tmpPoint);
       if( first )
         {
         first = false;
@@ -127,6 +132,8 @@ ImageMaskSpatialObject< TDimension, TPixel >
       prevValue = outsideValue;
       }
     }
+
+  this->GetModifiableMyBoundingBoxInObjectSpace()->SetPoints(maskBoundPoints);
 
   if( first )
     {
