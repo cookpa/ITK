@@ -125,9 +125,11 @@ GDCMSeriesFileNames::BuildSeriesMap()
 
   const gdcm::Tag seriesUID(0x0020, 0x000e);
   const gdcm::Tag instanceNumber(0x0020, 0x0013);
+  const gdcm::Tag rows(0x0028, 0x0010);
   gdcm::Scanner   scanner;
   scanner.AddTag(seriesUID);
   scanner.AddTag(instanceNumber);
+  scanner.AddTag(rows);
   if (m_UseSeriesDetails)
   {
     for (const auto & [group, element] : m_RefineTags)
@@ -171,6 +173,10 @@ GDCMSeriesFileNames::BuildSeriesMap()
     if (!scanner.IsKey(fn.c_str()))
     {
       continue; // not a DICOM file the scanner could read
+    }
+    if (scanner.GetValue(fn.c_str(), rows) == nullptr)
+    {
+      continue; // no Rows: not an image object (SR, RTSTRUCT, DICOMDIR, ...)
     }
     const std::string id = makeIdentifier(fn.c_str());
     SeriesEntry &     entry = m_SeriesFiles[id];

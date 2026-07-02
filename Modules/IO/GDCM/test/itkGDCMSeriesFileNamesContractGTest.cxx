@@ -110,6 +110,28 @@ WriteWithInstanceNumber(const std::string & src, const std::string & dst, const 
   writer.SetFile(reader.GetFile());
   return writer.Write();
 }
+
+// Copy one slice, stripping Rows/Columns/PixelData so it mimics a non-image
+// DICOM object (SR, RTSTRUCT, ...) sharing the series' SeriesInstanceUID.
+bool
+WriteNonImageObject(const std::string & src, const std::string & dst)
+{
+  gdcm::Reader reader;
+  reader.SetFileName(src.c_str());
+  if (!reader.Read())
+  {
+    return false;
+  }
+  gdcm::DataSet & ds = reader.GetFile().GetDataSet();
+  ds.Remove(gdcm::Tag(0x0028, 0x0010));
+  ds.Remove(gdcm::Tag(0x0028, 0x0011));
+  ds.Remove(gdcm::Tag(0x7fe0, 0x0010));
+  gdcm::Writer writer;
+  writer.SetCheckFileMetaInformation(false);
+  writer.SetFileName(dst.c_str());
+  writer.SetFile(reader.GetFile());
+  return writer.Write();
+}
 } // namespace
 
 TEST(GDCMSeriesFileNamesContract, SingleSeriesEnumerationAndGrouping)
@@ -222,4 +244,27 @@ TEST(GDCMSeriesFileNamesContract, LegacyFallbackUsesInstanceNumberThenFilename)
   const std::vector<std::string> nameOrdered = lex->GetInputFileNames();
   ASSERT_EQ(nameOrdered.size(), 2u);
   EXPECT_LT(nameOrdered[0], nameOrdered[1]);
+}
+
+TEST(GDCMSeriesFileNamesContract, NonImageObjectsExcluded)
+{
+  const std::string root = TOSTRING(ITK_TEST_OUTPUT_DIR) + "/gdcmcontract_nonimage";
+  itksys::SystemTools::RemoveADirectory(root);
+  itksys::SystemTools::MakeDirectory(root);
+  const unsigned int copied = CopyDicomSlices(SeriesDir(), root);
+  ASSERT_GT(copied, 1u);
+  const std::string slice = FirstDicomSlice(SeriesDir());
+  ASSERT_FALSE(slice.empty());
+  ASSERT_TRUE(WriteNonImageObject(slice, root + "/structured_report.dcm"));
+
+  auto sf = itk::GDCMSeriesFileNames::New();
+  sf->SetInputDirectory(root);
+  const std::vector<std::string> uids = sf->GetSeriesUIDs();
+  ASSERT_EQ(uids.size(), 1u) << "Non-image object must not surface as an extra series";
+  const std::vector<std::string> files = sf->GetFileNames(uids.front());
+  EXPECT_EQ(files.size(), copied) << "Only image slices are enumerated";
+  for (const std::string & fn : files)
+  {
+    EXPECT_EQ(fn.find("structured_report"), std::string::npos);
+  }
 }

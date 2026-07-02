@@ -895,6 +895,9 @@ unchanged; consumers compile without modification.
 - `SetLoadSequences`/`SetLoadPrivateTags` have no effect with the
   `gdcm::Scanner` backend (the scan reads only the grouping/ordering tags).
   They are retained for source compatibility but no longer alter enumeration.
+- Non-image DICOM objects (structured reports, RTSTRUCT, DICOMDIR,
+  presentation states — anything without Rows `(0028,0010)`) are excluded
+  from enumeration, matching `SerieHelper`'s `ImageReader`-based acceptance.
 
 ### Concerns
 
