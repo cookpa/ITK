@@ -873,3 +873,52 @@ variable declared as `FilterType::OutputIterator` and then passed where an
 siblings in the iterator hierarchy, not subclasses, so such uses do not convert
 implicitly. Code that only iterates (`GoToBegin`/`IsAtEnd`/`Get`/`Set`) needs no
 change.
+
+## `GDCMSeriesFileNames` reimplemented on `gdcm::Scanner`/`IPPSorter`
+
+`itk::GDCMSeriesFileNames` no longer uses the GDCM-deprecated
+`gdcm::SerieHelper`. It now enumerates with `gdcm::Directory`, groups series
+with `gdcm::Scanner` (replicating `SerieHelper::CreateUniqueSeriesIdentifier`),
+and orders slices geometrically with `gdcm::IPPSorter`. The public API is
+unchanged; consumers compile without modification.
+
+### What you need to do
+
+- Nothing for the common case: single-series directories enumerate, group, and
+  order as before.
+- If you relied on file ordering for **duplicate-`ImagePositionPatient`** or
+  **gantry-tilted** acquisitions, re-check it. `gdcm::IPPSorter` is strict and
+  fails to sort those; on failure an exception is thrown by default. Call
+  `SetFailOnAmbiguousOrdering(false)` to instead accept the legacy
+  `SerieHelper` heuristics (Instance Number when unique, else lexicographic
+  filename order) — a non-standards-conforming fallback retained only for
+  determinism and backward compatibility; do not trust its output.
+  First-class support is tracked in
+  [#6468](https://github.com/InsightSoftwareConsortium/ITK/issues/6468).
+- Tags passed to `AddSeriesRestriction` now refine the series identifier
+  (sub-dividing a `SeriesInstanceUID`, the documented intent, e.g.
+  `"0008|0021"`) instead of `SerieHelper`'s largely-inert file-restriction
+  list. Malformed tags are warned-and-ignored rather than honored.
+- `SetLoadSequences`/`SetLoadPrivateTags` have no effect with the
+  `gdcm::Scanner` backend (the scan reads only the grouping/ordering tags).
+  They are retained for source compatibility but no longer alter enumeration.
+- Non-image DICOM objects (structured reports, RTSTRUCT, DICOMDIR,
+  presentation states — anything without Rows `(0028,0010)`) are excluded
+  from enumeration, matching `SerieHelper`'s `ImageReader`-based acceptance.
+- `GetUseSeriesDetails()` now defaults to `false`, consistent with the
+  documented opt-in ("you may want to try calling `SetUseSeriesDetails(true)`")
+  and with DICOM series identity: by default series are grouped by their raw
+  `SeriesInstanceUID` `(0020,000e)`, and `GetFileNames(<raw UID>)` matches.
+  Grouping behavior is unchanged — the previous backend never applied the
+  detail tags until `SetUseSeriesDetails(true)` was called, even though the
+  getter misreported `true`. Only code that read `GetUseSeriesDetails()`
+  before calling the setter sees a different (now truthful) value.
+
+### Concerns
+
+- Repeated `GetSeriesUIDs`/`GetFileNames`/`GetInputFileNames` calls no longer
+  re-scan the directory (lazy parse cached by a `TimeStamp`); a directory
+  mutated on disk between calls without an intervening `Modified()` is not
+  re-read.
+- The vendored `gdcm::SerieHelper` is untouched (GDCM still uses it
+  internally); it may be removed once upstream GDCM drops it.

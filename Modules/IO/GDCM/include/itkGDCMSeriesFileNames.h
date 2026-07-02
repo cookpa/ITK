@@ -21,14 +21,10 @@
 #include "itkProcessObject.h"
 #include "itkObjectFactory.h"
 #include "itkMacro.h"
+#include <map>
+#include <utility>
 #include <vector>
 #include "ITKIOGDCMExport.h"
-
-// forward declaration, to remove compile dependency on GDCM library
-namespace gdcm
-{
-class SerieHelper;
-}
 
 namespace itk
 {
@@ -42,10 +38,11 @@ namespace itk
  *
  *   1. Extract Image Orientation & Image Position from DICOM images, and then
  *      calculate the ordering based on the 3D coordinate of the slice.
- *   2. If for some reason this information is not found or failed, another
- *      strategy is used: the ordering is based on 'Instance Number'.
- *   3. If this strategy also failed, then the filenames are ordered by
- *      lexicographical order.
+ *   2. If the geometric ordering fails (duplicate positions, inconsistent
+ *      orientation), an exception is thrown by default; see
+ *      FailOnAmbiguousOrdering. When FailOnAmbiguousOrdering is false, the
+ *      ordering falls back to 'Instance Number' when unique, else to
+ *      lexicographic filename order.
  *
  *  If multiple volumes are being grouped as a single series for your
  *    DICOM objects, you may want to try calling SetUseSeriesDetails(true)
@@ -148,7 +145,9 @@ public:
 
   /** Use additional series information such as ProtocolName
    *   and SeriesName to identify when a single SeriesUID contains
-   *   multiple 3D volumes - as can occur with perfusion and DTI imaging
+   *   multiple 3D volumes - as can occur with perfusion and DTI imaging.
+   *   Off by default: series are identified by their SeriesInstanceUID
+   *   (0020,000e) alone, per the DICOM information model.
    */
   void
   SetUseSeriesDetails(bool useSeriesDetails);
@@ -166,15 +165,28 @@ public:
   /** Add more restriction on the selection of a Series. This follows the same
    * approach as SetUseSeriesDetails, but allows a user to add even more DICOM
    * tags to take into account for subrefining a set of DICOM files into multiple
-   * series. The tag format is "group|element" of a DICOM tag.
+   * series. The tag format is "group|element" of a DICOM tag. Call order
+   * relative to SetUseSeriesDetails does not matter.
    * \warning UseSeriesDetails needs to be set to true.
    */
   void
   AddSeriesRestriction(const std::string & tag);
 
-  /** Parse any sequences in the DICOM file. Defaults to false
-   *  to skip sequences. This makes loading DICOM files faster when
-   *  sequences are not needed.
+  /** Throw an exception when a series cannot be ordered geometrically by
+   * gdcm::IPPSorter (duplicate ImagePositionPatient, inconsistent
+   * orientation). When false, fall back to the legacy SerieHelper
+   * heuristics: Instance Number when unique, else lexicographic filename
+   * order. The fallback is not DICOM-standards conforming and its output
+   * should not be trusted; it exists only for backward compatibility. */
+  /** @ITKStartGrouping */
+  itkSetMacro(FailOnAmbiguousOrdering, bool);
+  itkGetConstMacro(FailOnAmbiguousOrdering, bool);
+  itkBooleanMacro(FailOnAmbiguousOrdering);
+  /** @ITKEndGrouping */
+
+  /** No effect with the gdcm::Scanner backend (retained for source
+   *  compatibility). Series enumeration reads only the grouping and
+   *  ordering tags, so sequences are never parsed during the scan.
    */
   /** @ITKStartGrouping */
   itkSetMacro(LoadSequences, bool);
@@ -182,9 +194,9 @@ public:
   itkBooleanMacro(LoadSequences);
   /** @ITKEndGrouping */
 
-  /** Parse any private tags in the DICOM file. Defaults to false
-   * to skip private tags. This makes loading DICOM files faster when
-   * private tags are not needed.
+  /** No effect with the gdcm::Scanner backend (retained for source
+   *  compatibility). Series enumeration reads only the grouping and
+   *  ordering tags, so private tags are never parsed during the scan.
    */
   /** @ITKStartGrouping */
   itkSetMacro(LoadPrivateTags, bool);
@@ -208,13 +220,42 @@ private:
   FileNamesContainerType m_InputFileNames{};
   FileNamesContainerType m_OutputFileNames{};
 
-  /** Internal structure to order series from one directory */
-  std::unique_ptr<gdcm::SerieHelper> m_SerieHelper;
+  /** Parse the input directory into the per-series file-name map. */
+  void
+  BuildSeriesMap();
+
+  /** Files of one series; ordered lazily on the first GetFileNames call. */
+  struct SeriesEntry
+  {
+    FileNamesContainerType Files{};
+    bool                   Ordered{ false };
+  };
+
+  /** Order one series geometrically, or apply the legacy fallback / throw
+   * per FailOnAmbiguousOrdering. */
+  void
+  OrderSeries(SeriesEntry & entry);
+
+  /** File names per distinct series identifier. */
+  std::map<std::string, SeriesEntry> m_SeriesFiles{};
+
+  /** Instance Number (0020,0013) per scanned file, for the legacy fallback. */
+  std::map<std::string, std::string> m_InstanceNumbers{};
+
+  /** User (group,element) tags from AddSeriesRestriction, appended to the
+   * series identifier (after the default detail tags) when UseSeriesDetails
+   * is enabled. */
+  std::vector<std::pair<unsigned short, unsigned short>> m_UserRefineTags{};
+
+  /** Modified time of the last directory parse; the cache is rebuilt only
+   * when the object has been Modified() since. */
+  TimeStamp m_CacheBuildTime{};
 
   /** Internal structure to keep the list of series UIDs */
   SeriesUIDContainerType m_SeriesUIDs{};
 
-  bool m_UseSeriesDetails = true;
+  bool m_UseSeriesDetails = false;
+  bool m_FailOnAmbiguousOrdering = true;
   bool m_Recursive = false;
   bool m_LoadSequences = false;
   bool m_LoadPrivateTags = false;

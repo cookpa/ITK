@@ -18,17 +18,34 @@
 
 #include "itkGDCMSeriesFileNames.h"
 #include "itksys/SystemTools.hxx"
-#include "itkProgressReporter.h"
 #include "itkPrintHelper.h"
-#include "gdcmSerieHelper.h"
+#include "gdcmDirectory.h"
+#include "gdcmScanner.h"
+#include "gdcmIPPSorter.h"
+#include "gdcmTag.h"
+#include <algorithm>
+#include <cctype>
+#include <map>
+#include <stdexcept>
+#include <vector>
 
 namespace itk
 {
 
+namespace
+{
+// Default series-detail tags, matching
+// gdcm::SerieHelper::CreateDefaultUniqueSeriesIdentifier.
+constexpr std::pair<unsigned short, unsigned short> DefaultDetailTags[] = {
+  { 0x0020, 0x0011 }, // Series Number
+  { 0x0018, 0x0024 }, // Sequence Name
+  { 0x0018, 0x0050 }, // Slice Thickness
+  { 0x0028, 0x0010 }, // Rows
+  { 0x0028, 0x0011 }, // Columns
+};
+} // namespace
 
-GDCMSeriesFileNames::GDCMSeriesFileNames()
-  : m_SerieHelper{ new gdcm::SerieHelper() }
-{}
+GDCMSeriesFileNames::GDCMSeriesFileNames() = default;
 
 GDCMSeriesFileNames::~GDCMSeriesFileNames() = default;
 
@@ -47,7 +64,27 @@ GDCMSeriesFileNames::SetInputDirectory(const char * name)
 void
 GDCMSeriesFileNames::AddSeriesRestriction(const std::string & tag)
 {
-  m_SerieHelper->AddRestriction(tag);
+  // Parse a "group|element" tag (hex) and add it to the series-identifier
+  // criteria so it sub-refines a SeriesInstanceUID into multiple series, as
+  // documented and as used by the ITK examples (e.g. "0008|0021").
+  const std::string::size_type bar = tag.find('|');
+  if (bar == std::string::npos)
+  {
+    itkWarningMacro("Ignoring malformed series restriction tag '" << tag << "' (expected \"group|element\")");
+    return;
+  }
+  try
+  {
+    const auto group = static_cast<unsigned short>(std::stoul(tag.substr(0, bar), nullptr, 16));
+    const auto element = static_cast<unsigned short>(std::stoul(tag.substr(bar + 1), nullptr, 16));
+    m_UserRefineTags.emplace_back(group, element);
+  }
+  catch (const std::exception &)
+  {
+    itkWarningMacro("Ignoring malformed series restriction tag '" << tag << "' (expected hex \"group|element\")");
+    return;
+  }
+  this->Modified();
 }
 
 void
@@ -68,33 +105,172 @@ GDCMSeriesFileNames::SetInputDirectory(const std::string & name)
     return;
   }
   m_InputDirectory = name;
-  m_SerieHelper->Clear();
-  m_SerieHelper->SetUseSeriesDetails(m_UseSeriesDetails);
-  m_SerieHelper->SetLoadMode((m_LoadSequences ? 0 : gdcm::LD_NOSEQ) | (m_LoadPrivateTags ? 0 : gdcm::LD_NOSHADOW));
-  m_SerieHelper->SetDirectory(name, m_Recursive);
-  // as a side effect it also execute
   this->Modified();
+}
+
+void
+GDCMSeriesFileNames::BuildSeriesMap()
+{
+  // Reuse the previous parse unless the object has been modified since.
+  if (m_CacheBuildTime.GetMTime() > this->GetMTime())
+  {
+    return;
+  }
+  m_SeriesUIDs.clear();
+  m_SeriesFiles.clear();
+  m_InstanceNumbers.clear();
+
+  if (m_InputDirectory.empty())
+  {
+    return;
+  }
+
+  gdcm::Directory dir;
+  dir.Load(m_InputDirectory, m_Recursive);
+  const gdcm::Directory::FilenamesType & filenames = dir.GetFilenames();
+  if (filenames.empty())
+  {
+    return;
+  }
+
+  std::vector<std::pair<unsigned short, unsigned short>> refineTags;
+  if (m_UseSeriesDetails)
+  {
+    refineTags.assign(std::begin(DefaultDetailTags), std::end(DefaultDetailTags));
+    refineTags.insert(refineTags.end(), m_UserRefineTags.begin(), m_UserRefineTags.end());
+  }
+
+  const gdcm::Tag seriesUID(0x0020, 0x000e);
+  const gdcm::Tag instanceNumber(0x0020, 0x0013);
+  const gdcm::Tag rows(0x0028, 0x0010);
+  gdcm::Scanner   scanner;
+  scanner.AddTag(seriesUID);
+  scanner.AddTag(instanceNumber);
+  scanner.AddTag(rows);
+  for (const auto & [group, element] : refineTags)
+  {
+    scanner.AddTag(gdcm::Tag(group, element));
+  }
+  if (!scanner.Scan(filenames))
+  {
+    itkWarningMacro("Failed to scan DICOM tags in " << m_InputDirectory);
+    return;
+  }
+
+  // Build the unique series identifier per file, replicating
+  // gdcm::SerieHelper::CreateUniqueSeriesIdentifier.
+  auto makeIdentifier = [&](const char * fn) -> std::string {
+    const char *      uidValue = scanner.GetValue(fn, seriesUID);
+    std::string       id = (uidValue != nullptr) ? uidValue : "";
+    const std::string uid = id;
+    for (const auto & [group, element] : refineTags)
+    {
+      const char *      value = scanner.GetValue(fn, gdcm::Tag(group, element));
+      const std::string s = (value != nullptr) ? value : "";
+      if (id == uid && !s.empty())
+      {
+        id += '.';
+      }
+      id += s;
+    }
+    // Eliminate all non-alphanumeric characters (keep '.').
+    id.erase(std::remove_if(id.begin(), id.end(), [](unsigned char c) { return c != '.' && std::isalnum(c) == 0; }),
+             id.end());
+    return id;
+  };
+
+  for (const std::string & fn : filenames)
+  {
+    if (!scanner.IsKey(fn.c_str()))
+    {
+      continue; // not a DICOM file the scanner could read
+    }
+    if (scanner.GetValue(fn.c_str(), rows) == nullptr)
+    {
+      continue; // no Rows: not an image object (SR, RTSTRUCT, DICOMDIR, ...)
+    }
+    const std::string id = makeIdentifier(fn.c_str());
+    SeriesEntry &     entry = m_SeriesFiles[id];
+    if (entry.Files.empty())
+    {
+      m_SeriesUIDs.push_back(id);
+    }
+    entry.Files.push_back(fn);
+    if (const char * number = scanner.GetValue(fn.c_str(), instanceNumber))
+    {
+      m_InstanceNumbers[fn] = number;
+    }
+  }
+
+  m_CacheBuildTime.Modified();
+}
+
+void
+GDCMSeriesFileNames::OrderSeries(SeriesEntry & entry)
+{
+  if (entry.Ordered || entry.Files.size() < 2)
+  {
+    entry.Ordered = true;
+    return;
+  }
+  // Geometric ordering: ImagePositionPatient projected on the slice normal.
+  // gdcm::IPPSorter is strict: it FAILS on duplicate IPP and gantry-tilt
+  // acquisitions (see issue #6468).
+  gdcm::IPPSorter sorter;
+  sorter.SetComputeZSpacing(false);
+  if (sorter.Sort(entry.Files))
+  {
+    entry.Files = sorter.GetFilenames();
+    entry.Ordered = true;
+    return;
+  }
+  if (m_FailOnAmbiguousOrdering)
+  {
+    itkExceptionMacro("Series cannot be ordered geometrically (duplicate ImagePositionPatient or inconsistent "
+                      "orientation, see issue #6468). Set FailOnAmbiguousOrdering to false to accept the legacy "
+                      "non-standard ordering heuristics.");
+  }
+  // Legacy SerieHelper heuristics (Instance Number, then lexicographic),
+  // kept only for determinism and backward compatibility: an untrustworthy,
+  // non-standard hack whose output should not be trusted.
+  std::map<long, std::string> byInstanceNumber;
+  bool                        instanceNumbersUsable = true;
+  for (const std::string & fn : entry.Files)
+  {
+    const auto found = m_InstanceNumbers.find(fn);
+    try
+    {
+      const long number = std::stol(found != m_InstanceNumbers.end() ? found->second : std::string());
+      instanceNumbersUsable = byInstanceNumber.emplace(number, fn).second;
+    }
+    catch (const std::exception &)
+    {
+      instanceNumbersUsable = false;
+    }
+    if (!instanceNumbersUsable)
+    {
+      break;
+    }
+  }
+  if (instanceNumbersUsable)
+  {
+    entry.Files.clear();
+    for (const auto & [number, fn] : byInstanceNumber)
+    {
+      entry.Files.push_back(fn);
+    }
+  }
+  else
+  {
+    std::sort(entry.Files.begin(), entry.Files.end());
+  }
+  entry.Ordered = true;
 }
 
 const GDCMSeriesFileNames::SeriesUIDContainerType &
 GDCMSeriesFileNames::GetSeriesUIDs()
 {
-  m_SeriesUIDs.clear();
-  // Accessing the first serie found (assume there is at least one)
-  gdcm::FileList * flist = m_SerieHelper->GetFirstSingleSerieUIDFileSet();
-  while (flist)
-  {
-    if (!flist->empty()) // make sure we have at least one serie
-    {
-      gdcm::File * file = (*flist)[0]; // for example take the first one
-
-      // Create its unique series ID
-      const std::string id = m_SerieHelper->CreateUniqueSeriesIdentifier(file).c_str();
-
-      m_SeriesUIDs.emplace_back(id.c_str());
-    }
-    flist = m_SerieHelper->GetNextSingleSerieUIDFileSet();
-  }
+  this->BuildSeriesMap();
   if (m_SeriesUIDs.empty())
   {
     itkWarningMacro("No Series were found");
@@ -105,55 +281,31 @@ GDCMSeriesFileNames::GetSeriesUIDs()
 const GDCMSeriesFileNames::FileNamesContainerType &
 GDCMSeriesFileNames::GetFileNames(const std::string serie)
 {
+  this->BuildSeriesMap();
   m_InputFileNames.clear();
-  // Accessing the first serie found (assume there is at least one)
-  gdcm::FileList * flist = m_SerieHelper->GetFirstSingleSerieUIDFileSet();
-  if (!flist)
+  if (serie.empty())
   {
-    itkWarningMacro("No Series can be found, make sure your restrictions are not too strong");
+    // Return the first series encountered (single-series assumption).
+    if (!m_SeriesUIDs.empty())
+    {
+      SeriesEntry & entry = m_SeriesFiles[m_SeriesUIDs.front()];
+      this->OrderSeries(entry);
+      m_InputFileNames = entry.Files;
+    }
+    else
+    {
+      itkWarningMacro("No Series can be found, make sure your restrictions are not too strong");
+    }
     return m_InputFileNames;
   }
-  if (!serie.empty()) // user did not specify any sub selection based on UID
+  const auto it = m_SeriesFiles.find(serie);
+  if (it == m_SeriesFiles.end())
   {
-    bool found = false;
-    while (flist && !found)
-    {
-      if (!flist->empty()) // make sure we have at least one serie
-      {
-        gdcm::File *      file = (*flist)[0]; // for example take the first one
-        const std::string id = m_SerieHelper->CreateUniqueSeriesIdentifier(file).c_str();
-
-        if (id == serie)
-        {
-          found = true; // we found a match
-          break;
-        }
-      }
-      flist = m_SerieHelper->GetNextSingleSerieUIDFileSet();
-    }
-    if (!found)
-    {
-      itkWarningMacro("No Series were found");
-      return m_InputFileNames;
-    }
+    itkWarningMacro("No Series were found");
+    return m_InputFileNames;
   }
-  m_SerieHelper->OrderFileList(flist);
-
-  if (!flist->empty())
-  {
-    ProgressReporter progress(this, 0, static_cast<itk::SizeValueType>(flist->size()), 10);
-    for (auto & element : *flist)
-    {
-      gdcm::FileWithName * header = element;
-      m_InputFileNames.push_back(header->filename);
-      progress.CompletedPixel();
-    }
-  }
-  else
-  {
-    itkDebugMacro("No files were found");
-  }
-
+  this->OrderSeries(it->second);
+  m_InputFileNames = it->second.Files;
   return m_InputFileNames;
 }
 
@@ -256,19 +408,10 @@ GDCMSeriesFileNames::PrintSelf(std::ostream & os, Indent indent) const
   os << indent << "InputFileNames: " << m_InputFileNames << std::endl;
   os << indent << "OutputFileNames: " << m_OutputFileNames << std::endl;
 
-  os << indent << "SerieHelper: ";
-  if (m_SerieHelper.get() != nullptr)
-  {
-    os << m_SerieHelper.get() << std::endl;
-  }
-  else
-  {
-    os << "(null)" << std::endl;
-  }
-
   os << indent << "SeriesUIDs: " << m_SeriesUIDs << std::endl;
 
   itkPrintSelfBooleanMacro(UseSeriesDetails);
+  itkPrintSelfBooleanMacro(FailOnAmbiguousOrdering);
   itkPrintSelfBooleanMacro(Recursive);
   itkPrintSelfBooleanMacro(LoadSequences);
   itkPrintSelfBooleanMacro(LoadPrivateTags);
@@ -277,8 +420,10 @@ GDCMSeriesFileNames::PrintSelf(std::ostream & os, Indent indent) const
 void
 GDCMSeriesFileNames::SetUseSeriesDetails(bool useSeriesDetails)
 {
-  m_UseSeriesDetails = useSeriesDetails;
-  m_SerieHelper->SetUseSeriesDetails(m_UseSeriesDetails);
-  m_SerieHelper->CreateDefaultUniqueSeriesIdentifier();
+  if (m_UseSeriesDetails != useSeriesDetails)
+  {
+    m_UseSeriesDetails = useSeriesDetails;
+    this->Modified();
+  }
 }
 } // namespace itk
