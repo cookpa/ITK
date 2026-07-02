@@ -32,10 +32,20 @@
 namespace itk
 {
 
-GDCMSeriesFileNames::GDCMSeriesFileNames()
+namespace
 {
-  this->SetUseSeriesDetails(true); // seeds the default series-detail tags
-}
+// Default series-detail tags, matching
+// gdcm::SerieHelper::CreateDefaultUniqueSeriesIdentifier.
+constexpr std::pair<unsigned short, unsigned short> DefaultDetailTags[] = {
+  { 0x0020, 0x0011 }, // Series Number
+  { 0x0018, 0x0024 }, // Sequence Name
+  { 0x0018, 0x0050 }, // Slice Thickness
+  { 0x0028, 0x0010 }, // Rows
+  { 0x0028, 0x0011 }, // Columns
+};
+} // namespace
+
+GDCMSeriesFileNames::GDCMSeriesFileNames() = default;
 
 GDCMSeriesFileNames::~GDCMSeriesFileNames() = default;
 
@@ -67,7 +77,7 @@ GDCMSeriesFileNames::AddSeriesRestriction(const std::string & tag)
   {
     const auto group = static_cast<unsigned short>(std::stoul(tag.substr(0, bar), nullptr, 16));
     const auto element = static_cast<unsigned short>(std::stoul(tag.substr(bar + 1), nullptr, 16));
-    m_RefineTags.emplace_back(group, element);
+    m_UserRefineTags.emplace_back(group, element);
   }
   catch (const std::exception &)
   {
@@ -123,6 +133,13 @@ GDCMSeriesFileNames::BuildSeriesMap()
     return;
   }
 
+  std::vector<std::pair<unsigned short, unsigned short>> refineTags;
+  if (m_UseSeriesDetails)
+  {
+    refineTags.assign(std::begin(DefaultDetailTags), std::end(DefaultDetailTags));
+    refineTags.insert(refineTags.end(), m_UserRefineTags.begin(), m_UserRefineTags.end());
+  }
+
   const gdcm::Tag seriesUID(0x0020, 0x000e);
   const gdcm::Tag instanceNumber(0x0020, 0x0013);
   const gdcm::Tag rows(0x0028, 0x0010);
@@ -130,12 +147,9 @@ GDCMSeriesFileNames::BuildSeriesMap()
   scanner.AddTag(seriesUID);
   scanner.AddTag(instanceNumber);
   scanner.AddTag(rows);
-  if (m_UseSeriesDetails)
+  for (const auto & [group, element] : refineTags)
   {
-    for (const auto & [group, element] : m_RefineTags)
-    {
-      scanner.AddTag(gdcm::Tag(group, element));
-    }
+    scanner.AddTag(gdcm::Tag(group, element));
   }
   if (!scanner.Scan(filenames))
   {
@@ -149,18 +163,15 @@ GDCMSeriesFileNames::BuildSeriesMap()
     const char *      uidValue = scanner.GetValue(fn, seriesUID);
     std::string       id = (uidValue != nullptr) ? uidValue : "";
     const std::string uid = id;
-    if (m_UseSeriesDetails)
+    for (const auto & [group, element] : refineTags)
     {
-      for (const auto & [group, element] : m_RefineTags)
+      const char *      value = scanner.GetValue(fn, gdcm::Tag(group, element));
+      const std::string s = (value != nullptr) ? value : "";
+      if (id == uid && !s.empty())
       {
-        const char *      value = scanner.GetValue(fn, gdcm::Tag(group, element));
-        const std::string s = (value != nullptr) ? value : "";
-        if (id == uid && !s.empty())
-        {
-          id += '.';
-        }
-        id += s;
+        id += '.';
       }
+      id += s;
     }
     // Eliminate all non-alphanumeric characters (keep '.').
     id.erase(std::remove_if(id.begin(), id.end(), [](unsigned char c) { return c != '.' && std::isalnum(c) == 0; }),
@@ -409,17 +420,10 @@ GDCMSeriesFileNames::PrintSelf(std::ostream & os, Indent indent) const
 void
 GDCMSeriesFileNames::SetUseSeriesDetails(bool useSeriesDetails)
 {
-  m_UseSeriesDetails = useSeriesDetails;
-  m_RefineTags.clear();
-  if (m_UseSeriesDetails)
+  if (m_UseSeriesDetails != useSeriesDetails)
   {
-    // Default detail tags, matching gdcm::SerieHelper::CreateDefaultUniqueSeriesIdentifier.
-    m_RefineTags.emplace_back(0x0020, 0x0011); // Series Number
-    m_RefineTags.emplace_back(0x0018, 0x0024); // Sequence Name
-    m_RefineTags.emplace_back(0x0018, 0x0050); // Slice Thickness
-    m_RefineTags.emplace_back(0x0028, 0x0010); // Rows
-    m_RefineTags.emplace_back(0x0028, 0x0011); // Columns
+    m_UseSeriesDetails = useSeriesDetails;
+    this->Modified();
   }
-  this->Modified();
 }
 } // namespace itk

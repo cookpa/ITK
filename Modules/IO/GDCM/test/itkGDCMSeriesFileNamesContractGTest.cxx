@@ -275,6 +275,24 @@ TEST(GDCMSeriesFileNamesContract, NonImageObjectsExcluded)
   }
 }
 
+TEST(GDCMSeriesFileNamesContract, SeriesRestrictionSurvivesSetUseSeriesDetails)
+{
+  // Instance Number is unique per slice, so restricting on it splits the
+  // single series into one series per file — easy to detect.
+  auto restrictionFirst = itk::GDCMSeriesFileNames::New();
+  restrictionFirst->AddSeriesRestriction("0020|0013");
+  restrictionFirst->SetUseSeriesDetails(true);
+  restrictionFirst->SetInputDirectory(SeriesDir());
+  const std::vector<std::string> uids = restrictionFirst->GetSeriesUIDs();
+  EXPECT_GT(uids.size(), 1u) << "Restriction must take effect regardless of call order";
+
+  auto detailsFirst = itk::GDCMSeriesFileNames::New();
+  detailsFirst->SetUseSeriesDetails(true);
+  detailsFirst->AddSeriesRestriction("0020|0013");
+  detailsFirst->SetInputDirectory(SeriesDir());
+  EXPECT_EQ(detailsFirst->GetSeriesUIDs(), uids) << "Call order must not change the series grouping";
+}
+
 TEST(GDCMSeriesFileNamesContract, MixedContentDirectoryEnumeratesOnlyImageSeries)
 {
   const std::string root = TOSTRING(ITK_TEST_OUTPUT_DIR) + "/gdcmcontract_mixed";

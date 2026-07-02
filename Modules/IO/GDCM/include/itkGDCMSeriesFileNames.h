@@ -163,7 +163,8 @@ public:
   /** Add more restriction on the selection of a Series. This follows the same
    * approach as SetUseSeriesDetails, but allows a user to add even more DICOM
    * tags to take into account for subrefining a set of DICOM files into multiple
-   * series. The tag format is "group|element" of a DICOM tag.
+   * series. The tag format is "group|element" of a DICOM tag. Call order
+   * relative to SetUseSeriesDetails does not matter.
    * \warning UseSeriesDetails needs to be set to true.
    */
   void
@@ -239,10 +240,10 @@ private:
   /** Instance Number (0020,0013) per scanned file, for the legacy fallback. */
   std::map<std::string, std::string> m_InstanceNumbers{};
 
-  /** (group,element) tags appended to the series identifier when
-   * UseSeriesDetails is enabled; seeded with the GDCM default detail tags and
-   * extended by AddSeriesRestriction. */
-  std::vector<std::pair<unsigned short, unsigned short>> m_RefineTags{};
+  /** User (group,element) tags from AddSeriesRestriction, appended to the
+   * series identifier (after the default detail tags) when UseSeriesDetails
+   * is enabled. */
+  std::vector<std::pair<unsigned short, unsigned short>> m_UserRefineTags{};
 
   /** Modified time of the last directory parse; the cache is rebuilt only
    * when the object has been Modified() since. */
