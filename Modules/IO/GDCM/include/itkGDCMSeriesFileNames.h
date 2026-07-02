@@ -145,7 +145,9 @@ public:
 
   /** Use additional series information such as ProtocolName
    *   and SeriesName to identify when a single SeriesUID contains
-   *   multiple 3D volumes - as can occur with perfusion and DTI imaging
+   *   multiple 3D volumes - as can occur with perfusion and DTI imaging.
+   *   Off by default: series are identified by their SeriesInstanceUID
+   *   (0020,000e) alone, per the DICOM information model.
    */
   void
   SetUseSeriesDetails(bool useSeriesDetails);
@@ -252,7 +254,7 @@ private:
   /** Internal structure to keep the list of series UIDs */
   SeriesUIDContainerType m_SeriesUIDs{};
 
-  bool m_UseSeriesDetails = true;
+  bool m_UseSeriesDetails = false;
   bool m_FailOnAmbiguousOrdering = true;
   bool m_Recursive = false;
   bool m_LoadSequences = false;

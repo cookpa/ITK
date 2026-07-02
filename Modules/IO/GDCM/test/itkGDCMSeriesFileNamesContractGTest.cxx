@@ -35,6 +35,7 @@
 #include "gdcmReader.h"
 #include "gdcmWriter.h"
 #include "gdcmDataElement.h"
+#include "gdcmStringFilter.h"
 #include "gdcmTag.h"
 #include <cstring>
 #include <fstream>
@@ -89,6 +90,25 @@ FirstDicomSlice(const std::string & srcDir)
     }
   }
   return {};
+}
+
+std::string
+ReadSeriesInstanceUID(const std::string & file)
+{
+  gdcm::Reader reader;
+  reader.SetFileName(file.c_str());
+  if (!reader.Read())
+  {
+    return {};
+  }
+  gdcm::StringFilter sf;
+  sf.SetFile(reader.GetFile());
+  std::string uid = sf.ToString(gdcm::Tag(0x0020, 0x000e));
+  while (!uid.empty() && (uid.back() == '\0' || uid.back() == ' '))
+  {
+    uid.pop_back();
+  }
+  return uid;
 }
 
 // Copy one slice, overwriting Instance Number (0020,0013) so duplicate-IPP
@@ -273,6 +293,22 @@ TEST(GDCMSeriesFileNamesContract, NonImageObjectsExcluded)
   {
     EXPECT_EQ(fn.find("structured_report"), std::string::npos);
   }
+}
+
+TEST(GDCMSeriesFileNamesContract, DefaultGroupingUsesRawSeriesInstanceUID)
+{
+  const std::string slice = FirstDicomSlice(SeriesDir());
+  ASSERT_FALSE(slice.empty());
+  const std::string uid = ReadSeriesInstanceUID(slice);
+  ASSERT_FALSE(uid.empty());
+
+  auto sf = itk::GDCMSeriesFileNames::New();
+  EXPECT_FALSE(sf->GetUseSeriesDetails()) << "Series details are a documented opt-in";
+  sf->SetInputDirectory(SeriesDir());
+  const std::vector<std::string> uids = sf->GetSeriesUIDs();
+  ASSERT_EQ(uids.size(), 1u);
+  EXPECT_EQ(uids.front(), uid) << "Default identifiers are plain SeriesInstanceUIDs (0020,000e)";
+  EXPECT_FALSE(sf->GetFileNames(uid).empty()) << "A raw SeriesInstanceUID from other DICOM tooling must match";
 }
 
 TEST(GDCMSeriesFileNamesContract, SeriesRestrictionSurvivesSetUseSeriesDetails)

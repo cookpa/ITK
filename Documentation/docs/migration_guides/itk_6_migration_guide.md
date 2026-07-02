@@ -898,6 +898,14 @@ unchanged; consumers compile without modification.
 - Non-image DICOM objects (structured reports, RTSTRUCT, DICOMDIR,
   presentation states — anything without Rows `(0028,0010)`) are excluded
   from enumeration, matching `SerieHelper`'s `ImageReader`-based acceptance.
+- `GetUseSeriesDetails()` now defaults to `false`, consistent with the
+  documented opt-in ("you may want to try calling `SetUseSeriesDetails(true)`")
+  and with DICOM series identity: by default series are grouped by their raw
+  `SeriesInstanceUID` `(0020,000e)`, and `GetFileNames(<raw UID>)` matches.
+  Grouping behavior is unchanged — the previous backend never applied the
+  detail tags until `SetUseSeriesDetails(true)` was called, even though the
+  getter misreported `true`. Only code that read `GetUseSeriesDetails()`
+  before calling the setter sees a different (now truthful) value.
 
 ### Concerns
 
