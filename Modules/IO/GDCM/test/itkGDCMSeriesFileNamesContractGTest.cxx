@@ -37,6 +37,7 @@
 #include "gdcmDataElement.h"
 #include "gdcmTag.h"
 #include <cstring>
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -112,9 +113,10 @@ WriteWithInstanceNumber(const std::string & src, const std::string & dst, const 
 }
 
 // Copy one slice, stripping Rows/Columns/PixelData so it mimics a non-image
-// DICOM object (SR, RTSTRUCT, ...) sharing the series' SeriesInstanceUID.
+// DICOM object (SR, RTSTRUCT, ...) sharing the series' SeriesInstanceUID;
+// stripSeriesUID additionally drops SeriesInstanceUID (DICOMDIR-like).
 bool
-WriteNonImageObject(const std::string & src, const std::string & dst)
+WriteNonImageObject(const std::string & src, const std::string & dst, bool stripSeriesUID = false)
 {
   gdcm::Reader reader;
   reader.SetFileName(src.c_str());
@@ -126,6 +128,10 @@ WriteNonImageObject(const std::string & src, const std::string & dst)
   ds.Remove(gdcm::Tag(0x0028, 0x0010));
   ds.Remove(gdcm::Tag(0x0028, 0x0011));
   ds.Remove(gdcm::Tag(0x7fe0, 0x0010));
+  if (stripSeriesUID)
+  {
+    ds.Remove(gdcm::Tag(0x0020, 0x000e));
+  }
   gdcm::Writer writer;
   writer.SetCheckFileMetaInformation(false);
   writer.SetFileName(dst.c_str());
@@ -267,4 +273,45 @@ TEST(GDCMSeriesFileNamesContract, NonImageObjectsExcluded)
   {
     EXPECT_EQ(fn.find("structured_report"), std::string::npos);
   }
+}
+
+TEST(GDCMSeriesFileNamesContract, MixedContentDirectoryEnumeratesOnlyImageSeries)
+{
+  const std::string root = TOSTRING(ITK_TEST_OUTPUT_DIR) + "/gdcmcontract_mixed";
+  itksys::SystemTools::RemoveADirectory(root);
+  itksys::SystemTools::MakeDirectory(root);
+  const unsigned int copied = CopyDicomSlices(SeriesDir(), root);
+  ASSERT_GT(copied, 1u);
+  const std::string slice = FirstDicomSlice(SeriesDir());
+  ASSERT_FALSE(slice.empty());
+  // SR-like object sharing the series' SeriesInstanceUID.
+  ASSERT_TRUE(WriteNonImageObject(slice, root + "/report_in_series.dcm"));
+  // DICOMDIR-like object with no SeriesInstanceUID at all.
+  ASSERT_TRUE(WriteNonImageObject(slice, root + "/dicomdir_like.dcm", true));
+  // Plain non-DICOM file.
+  {
+    std::ofstream readme(root + "/README.txt");
+    readme << "not a DICOM file\n";
+  }
+
+  auto sf = itk::GDCMSeriesFileNames::New();
+  sf->SetInputDirectory(root);
+  const std::vector<std::string> uids = sf->GetSeriesUIDs();
+  ASSERT_EQ(uids.size(), 1u) << "Only the image series is enumerated";
+  const std::vector<std::string> ordered = sf->GetInputFileNames();
+  ASSERT_EQ(ordered.size(), copied);
+  for (const std::string & fn : ordered)
+  {
+    EXPECT_EQ(fn.find("report_in_series"), std::string::npos);
+    EXPECT_EQ(fn.find("dicomdir_like"), std::string::npos);
+    EXPECT_EQ(fn.find("README"), std::string::npos);
+  }
+
+  // The mixed content must not disturb geometric ordering of the series.
+  using ImageType = itk::Image<short, 3>;
+  auto reader = itk::ImageSeriesReader<ImageType>::New();
+  reader->SetImageIO(itk::GDCMImageIO::New());
+  reader->SetFileNames(ordered);
+  ASSERT_NO_THROW(reader->Update());
+  EXPECT_EQ(reader->GetOutput()->GetLargestPossibleRegion().GetSize()[2], ordered.size());
 }
