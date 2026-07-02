@@ -32,30 +32,6 @@
 namespace itk
 {
 
-namespace
-{
-// Order one series geometrically with gdcm::IPPSorter (ImagePositionPatient
-// projected on the slice normal). IPPSorter is strict: it FAILS on duplicate
-// IPP and gantry-tilt acquisitions (see issue #6468). On failure the input
-// order is left unchanged rather than fabricating an order.
-std::vector<std::string>
-OrderSeriesGeometrically(const std::vector<std::string> & files)
-{
-  if (files.size() < 2)
-  {
-    return files;
-  }
-  gdcm::IPPSorter sorter;
-  sorter.SetComputeZSpacing(false);
-  if (sorter.Sort(files))
-  {
-    return sorter.GetFilenames();
-  }
-  return files;
-}
-} // namespace
-
-
 GDCMSeriesFileNames::GDCMSeriesFileNames()
 {
   this->SetUseSeriesDetails(true); // seeds the default series-detail tags
@@ -132,6 +108,7 @@ GDCMSeriesFileNames::BuildSeriesMap()
   }
   m_SeriesUIDs.clear();
   m_SeriesFiles.clear();
+  m_InstanceNumbers.clear();
 
   if (m_InputDirectory.empty())
   {
@@ -147,8 +124,10 @@ GDCMSeriesFileNames::BuildSeriesMap()
   }
 
   const gdcm::Tag seriesUID(0x0020, 0x000e);
+  const gdcm::Tag instanceNumber(0x0020, 0x0013);
   gdcm::Scanner   scanner;
   scanner.AddTag(seriesUID);
+  scanner.AddTag(instanceNumber);
   if (m_UseSeriesDetails)
   {
     for (const auto & [group, element] : m_RefineTags)
@@ -187,7 +166,6 @@ GDCMSeriesFileNames::BuildSeriesMap()
     return id;
   };
 
-  std::map<std::string, FileNamesContainerType> grouped;
   for (const std::string & fn : filenames)
   {
     if (!scanner.IsKey(fn.c_str()))
@@ -195,19 +173,81 @@ GDCMSeriesFileNames::BuildSeriesMap()
       continue; // not a DICOM file the scanner could read
     }
     const std::string id = makeIdentifier(fn.c_str());
-    if (grouped.find(id) == grouped.end())
+    SeriesEntry &     entry = m_SeriesFiles[id];
+    if (entry.Files.empty())
     {
       m_SeriesUIDs.push_back(id);
     }
-    grouped[id].push_back(fn);
-  }
-
-  for (auto & [id, files] : grouped)
-  {
-    m_SeriesFiles[id] = OrderSeriesGeometrically(files);
+    entry.Files.push_back(fn);
+    if (const char * number = scanner.GetValue(fn.c_str(), instanceNumber))
+    {
+      m_InstanceNumbers[fn] = number;
+    }
   }
 
   m_CacheBuildTime.Modified();
+}
+
+void
+GDCMSeriesFileNames::OrderSeries(SeriesEntry & entry)
+{
+  if (entry.Ordered || entry.Files.size() < 2)
+  {
+    entry.Ordered = true;
+    return;
+  }
+  // Geometric ordering: ImagePositionPatient projected on the slice normal.
+  // gdcm::IPPSorter is strict: it FAILS on duplicate IPP and gantry-tilt
+  // acquisitions (see issue #6468).
+  gdcm::IPPSorter sorter;
+  sorter.SetComputeZSpacing(false);
+  if (sorter.Sort(entry.Files))
+  {
+    entry.Files = sorter.GetFilenames();
+    entry.Ordered = true;
+    return;
+  }
+  if (m_FailOnAmbiguousOrdering)
+  {
+    itkExceptionMacro("Series cannot be ordered geometrically (duplicate ImagePositionPatient or inconsistent "
+                      "orientation, see issue #6468). Set FailOnAmbiguousOrdering to false to accept the legacy "
+                      "non-standard ordering heuristics.");
+  }
+  // Legacy SerieHelper heuristics (Instance Number, then lexicographic),
+  // kept only for determinism and backward compatibility: an untrustworthy,
+  // non-standard hack whose output should not be trusted.
+  std::map<long, std::string> byInstanceNumber;
+  bool                        instanceNumbersUsable = true;
+  for (const std::string & fn : entry.Files)
+  {
+    const auto found = m_InstanceNumbers.find(fn);
+    try
+    {
+      const long number = std::stol(found != m_InstanceNumbers.end() ? found->second : std::string());
+      instanceNumbersUsable = byInstanceNumber.emplace(number, fn).second;
+    }
+    catch (const std::exception &)
+    {
+      instanceNumbersUsable = false;
+    }
+    if (!instanceNumbersUsable)
+    {
+      break;
+    }
+  }
+  if (instanceNumbersUsable)
+  {
+    entry.Files.clear();
+    for (const auto & [number, fn] : byInstanceNumber)
+    {
+      entry.Files.push_back(fn);
+    }
+  }
+  else
+  {
+    std::sort(entry.Files.begin(), entry.Files.end());
+  }
+  entry.Ordered = true;
 }
 
 const GDCMSeriesFileNames::SeriesUIDContainerType &
@@ -231,7 +271,9 @@ GDCMSeriesFileNames::GetFileNames(const std::string serie)
     // Return the first series encountered (single-series assumption).
     if (!m_SeriesUIDs.empty())
     {
-      m_InputFileNames = m_SeriesFiles[m_SeriesUIDs.front()];
+      SeriesEntry & entry = m_SeriesFiles[m_SeriesUIDs.front()];
+      this->OrderSeries(entry);
+      m_InputFileNames = entry.Files;
     }
     else
     {
@@ -245,7 +287,8 @@ GDCMSeriesFileNames::GetFileNames(const std::string serie)
     itkWarningMacro("No Series were found");
     return m_InputFileNames;
   }
-  m_InputFileNames = it->second;
+  this->OrderSeries(it->second);
+  m_InputFileNames = it->second.Files;
   return m_InputFileNames;
 }
 
@@ -351,6 +394,7 @@ GDCMSeriesFileNames::PrintSelf(std::ostream & os, Indent indent) const
   os << indent << "SeriesUIDs: " << m_SeriesUIDs << std::endl;
 
   itkPrintSelfBooleanMacro(UseSeriesDetails);
+  itkPrintSelfBooleanMacro(FailOnAmbiguousOrdering);
   itkPrintSelfBooleanMacro(Recursive);
   itkPrintSelfBooleanMacro(LoadSequences);
   itkPrintSelfBooleanMacro(LoadPrivateTags);

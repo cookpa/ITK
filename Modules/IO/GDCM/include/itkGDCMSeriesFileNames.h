@@ -38,10 +38,11 @@ namespace itk
  *
  *   1. Extract Image Orientation & Image Position from DICOM images, and then
  *      calculate the ordering based on the 3D coordinate of the slice.
- *   2. If for some reason this information is not found or failed, another
- *      strategy is used: the ordering is based on 'Instance Number'.
- *   3. If this strategy also failed, then the filenames are ordered by
- *      lexicographical order.
+ *   2. If the geometric ordering fails (duplicate positions, inconsistent
+ *      orientation), an exception is thrown by default; see
+ *      FailOnAmbiguousOrdering. When FailOnAmbiguousOrdering is false, the
+ *      ordering falls back to 'Instance Number' when unique, else to
+ *      lexicographic filename order.
  *
  *  If multiple volumes are being grouped as a single series for your
  *    DICOM objects, you may want to try calling SetUseSeriesDetails(true)
@@ -168,6 +169,18 @@ public:
   void
   AddSeriesRestriction(const std::string & tag);
 
+  /** Throw an exception when a series cannot be ordered geometrically by
+   * gdcm::IPPSorter (duplicate ImagePositionPatient, inconsistent
+   * orientation). When false, fall back to the legacy SerieHelper
+   * heuristics: Instance Number when unique, else lexicographic filename
+   * order. The fallback is not DICOM-standards conforming and its output
+   * should not be trusted; it exists only for backward compatibility. */
+  /** @ITKStartGrouping */
+  itkSetMacro(FailOnAmbiguousOrdering, bool);
+  itkGetConstMacro(FailOnAmbiguousOrdering, bool);
+  itkBooleanMacro(FailOnAmbiguousOrdering);
+  /** @ITKEndGrouping */
+
   /** No effect with the gdcm::Scanner backend (retained for source
    *  compatibility). Series enumeration reads only the grouping and
    *  ordering tags, so sequences are never parsed during the scan.
@@ -208,8 +221,23 @@ private:
   void
   BuildSeriesMap();
 
-  /** Ordered file names per distinct series identifier. */
-  std::map<std::string, FileNamesContainerType> m_SeriesFiles{};
+  /** Files of one series; ordered lazily on the first GetFileNames call. */
+  struct SeriesEntry
+  {
+    FileNamesContainerType Files{};
+    bool                   Ordered{ false };
+  };
+
+  /** Order one series geometrically, or apply the legacy fallback / throw
+   * per FailOnAmbiguousOrdering. */
+  void
+  OrderSeries(SeriesEntry & entry);
+
+  /** File names per distinct series identifier. */
+  std::map<std::string, SeriesEntry> m_SeriesFiles{};
+
+  /** Instance Number (0020,0013) per scanned file, for the legacy fallback. */
+  std::map<std::string, std::string> m_InstanceNumbers{};
 
   /** (group,element) tags appended to the series identifier when
    * UseSeriesDetails is enabled; seeded with the GDCM default detail tags and
@@ -224,6 +252,7 @@ private:
   SeriesUIDContainerType m_SeriesUIDs{};
 
   bool m_UseSeriesDetails = true;
+  bool m_FailOnAmbiguousOrdering = true;
   bool m_Recursive = false;
   bool m_LoadSequences = false;
   bool m_LoadPrivateTags = false;

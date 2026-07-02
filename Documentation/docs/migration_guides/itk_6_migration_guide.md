@@ -881,8 +881,12 @@ unchanged; consumers compile without modification.
   order as before.
 - If you relied on file ordering for **duplicate-`ImagePositionPatient`** or
   **gantry-tilted** acquisitions, re-check it. `gdcm::IPPSorter` is strict and
-  fails to sort those; on failure the input (filesystem) order is left
-  unchanged rather than fabricated. First-class support is tracked in
+  fails to sort those; on failure an exception is thrown by default. Call
+  `SetFailOnAmbiguousOrdering(false)` to instead accept the legacy
+  `SerieHelper` heuristics (Instance Number when unique, else lexicographic
+  filename order) — a non-standards-conforming fallback retained only for
+  determinism and backward compatibility; do not trust its output.
+  First-class support is tracked in
   [#6468](https://github.com/InsightSoftwareConsortium/ITK/issues/6468).
 - Tags passed to `AddSeriesRestriction` now refine the series identifier
   (sub-dividing a `SeriesInstanceUID`, the documented intent, e.g.
