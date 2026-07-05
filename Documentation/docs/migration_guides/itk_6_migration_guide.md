@@ -874,6 +874,35 @@ siblings in the iterator hierarchy, not subclasses, so such uses do not convert
 implicitly. Code that only iterates (`GoToBegin`/`IsAtEnd`/`Get`/`Set`) needs no
 change.
 
+## `itkDCMTKFileReader.h` is now a private header of `ITKIODCMTK`
+
+`itkDCMTKFileReader.h` and `itkDCMTKFileReader.cxx` moved from the module's
+installed `include/` directory to `src/`, making `ITKDCMTK` a private dependency
+of `ITKIODCMTK`. The reader (`itk::DCMTKFileReader`, `itk::DCMTKSequence`,
+`itk::DCMTKItem`) is no longer installed and is not part of the public ITK API.
+Downstream code that did `#include "itkDCMTKFileReader.h"` no longer resolves.
+
+### What you need to do
+
+Because the header is now private, its contents may change without notice or
+API-stability guarantees. Do not depend on it as an installed header. Instead,
+vendor a private copy of both files into your own project from the last commit
+where they were the public interface:
+
+```
+ITK commit db492d9b092a6ca585ab6b12e896ca63229ad8e8
+  Modules/IO/DCMTK/src/itkDCMTKFileReader.h
+  Modules/IO/DCMTK/src/itkDCMTKFileReader.cxx
+```
+
+Pin to that exact hash rather than tracking `main`; the file lives outside the
+public interface now and may diverge substantially in future ITK versions.
+Compile the vendored `.cxx` into your target and neutralize the
+`ITKIODCMTK_EXPORT` macro (define it empty) since the reader is no longer
+exported from a shared library. This is the approach taken by the Slicer
+`SUVFactorCalculatorCLI` and `PETStandardUptakeValueComputation` CLIs and by
+BRAINSTools `DWIConvert`.
+
 ## `GDCMSeriesFileNames` reimplemented on `gdcm::Scanner`/`IPPSorter`
 
 `itk::GDCMSeriesFileNames` no longer uses the GDCM-deprecated
