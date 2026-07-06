@@ -193,7 +193,7 @@ TernaryGeneratorImageFilter<TInputImage1, TInputImage2, TInputImage3, TOutputIma
   const DataObject * input = nullptr;
   const auto *       inputPtr1 = dynamic_cast<const TInputImage1 *>(ProcessObject::GetInput(0));
   const auto *       inputPtr2 = dynamic_cast<const TInputImage2 *>(ProcessObject::GetInput(1));
-  const auto *       inputPtr3 = dynamic_cast<const TInputImage2 *>(ProcessObject::GetInput(2));
+  const auto *       inputPtr3 = dynamic_cast<const TInputImage3 *>(ProcessObject::GetInput(2));
 
   if (this->GetNumberOfInputs() >= 3)
   {
