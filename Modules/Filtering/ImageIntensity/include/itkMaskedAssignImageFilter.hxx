@@ -32,7 +32,7 @@ MaskedAssignImageFilter<TInputImage, TMaskImage, TOutputImage>::MaskedAssignImag
   auto func = [](const typename InputImageType::PixelType &  input,
                  const typename MaskImageType::PixelType &   mask,
                  const typename AssignImageType::PixelType & assign) -> OutputPixelType {
-    if (mask != NumericTraits<typename MaskImageType::PixelType>::Zero)
+    if (mask != NumericTraits<typename MaskImageType::PixelType>::ZeroValue())
     {
       return assign;
     }

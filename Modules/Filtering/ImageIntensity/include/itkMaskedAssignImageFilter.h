@@ -34,7 +34,7 @@ namespace itk
  *
  * The first input is the "input image", the second is the "mask image",
  * the third is the "assign image". Any of the images can be set as constants,
- * with third input can be set as constant with the `SetAssignConstant` method.
+ * and the third input can also be set as a constant using the `SetAssignConstant` method.
  *
  * For the "masked input" non-zero values are considered the mask, and assigned values
  * from the "assign input".

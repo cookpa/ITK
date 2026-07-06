@@ -209,9 +209,9 @@ TEST_F(MaskedAssignFixture, Test1)
   EXPECT_NO_THROW(filter->SetAssignConstant(5));
   EXPECT_EQ(5, filter->GetAssignConstant());
 
-  mask->SetPixel({ { 0, 0 } }, 1);
-
-  mask->SetPixel({ { 20, 21 } }, 1);
+  mask->SetPixel({ { 0, 0, 0 } }, 1);
+  mask->SetPixel({ { 20, 21, 0 } }, 1);
+  mask->SetPixel({ { 10, 10, 5 } }, 1);
 
   filter->SetInput(image);
   filter->SetMaskImage(mask);
@@ -219,14 +219,12 @@ TEST_F(MaskedAssignFixture, Test1)
   filter->Update();
   auto output = filter->GetOutput();
 
-  EXPECT_EQ(5, output->GetPixel({ { 0, 0 } }));
-  EXPECT_EQ(99, output->GetPixel({ { 0, 1 } }));
-
-  EXPECT_EQ(99, output->GetPixel({ { 1, 1 } }));
-
-  EXPECT_EQ(5, output->GetPixel({ { 20, 21 } }));
-
-  EXPECT_EQ("b28618b5cccaa828028a29b44d88c728", MD5Hash(output));
+  EXPECT_EQ(5, output->GetPixel({ { 0, 0, 0 } }));
+  EXPECT_EQ(99, output->GetPixel({ { 0, 1, 0 } }));
+  EXPECT_EQ(99, output->GetPixel({ { 1, 1, 0 } }));
+  EXPECT_EQ(5, output->GetPixel({ { 20, 21, 0 } }));
+  EXPECT_EQ(5, output->GetPixel({ { 10, 10, 5 } }));
+  EXPECT_EQ(99, output->GetPixel({ { 10, 10, 4 } }));
 }
 
 
@@ -250,9 +248,9 @@ TEST_F(MaskedAssignFixture, VectorTest2)
 
   auto mask = Utils::CreateMaskImage(21);
   mask->FillBuffer(0);
-  mask->SetPixel({ { 2, 2 } }, 1);
-
-  mask->SetPixel({ { 3, 19 } }, 1);
+  mask->SetPixel({ { 2, 2, 0 } }, 1);
+  mask->SetPixel({ { 3, 19, 0 } }, 1);
+  mask->SetPixel({ { 5, 5, 5 } }, 1);
 
   filter->SetInput(image);
   filter->SetMaskImage(mask);
@@ -260,10 +258,9 @@ TEST_F(MaskedAssignFixture, VectorTest2)
   filter->Update();
   auto output = filter->GetOutput();
 
-  EXPECT_EQ(p, output->GetPixel({ { 0, 0 } }));
-  EXPECT_EQ(c, output->GetPixel({ { 2, 2 } }));
-  EXPECT_EQ(c, output->GetPixel({ { 3, 19 } }));
-
-
-  EXPECT_EQ("f089464fcbec9429f409ee779788cca3", MD5Hash(output));
+  EXPECT_EQ(p, output->GetPixel({ { 0, 0, 0 } }));
+  EXPECT_EQ(c, output->GetPixel({ { 2, 2, 0 } }));
+  EXPECT_EQ(c, output->GetPixel({ { 3, 19, 0 } }));
+  EXPECT_EQ(c, output->GetPixel({ { 5, 5, 5 } }));
+  EXPECT_EQ(p, output->GetPixel({ { 5, 5, 4 } }));
 }
