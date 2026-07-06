@@ -35,10 +35,6 @@
 namespace itk
 {
 template <typename TInputImage, typename TOutputImage, typename TKernel>
-BinaryMorphologicalOpeningImageFilter<TInputImage, TOutputImage, TKernel>::BinaryMorphologicalOpeningImageFilter()
-{}
-
-template <typename TInputImage, typename TOutputImage, typename TKernel>
 void
 BinaryMorphologicalOpeningImageFilter<TInputImage, TOutputImage, TKernel>::GenerateData()
 {

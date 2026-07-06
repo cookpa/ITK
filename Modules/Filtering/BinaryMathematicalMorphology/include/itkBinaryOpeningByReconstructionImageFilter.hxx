@@ -25,11 +25,6 @@
 
 namespace itk
 {
-
-template <typename TInputImage, typename TKernel>
-BinaryOpeningByReconstructionImageFilter<TInputImage, TKernel>::BinaryOpeningByReconstructionImageFilter()
-{}
-
 template <typename TInputImage, typename TKernel>
 void
 BinaryOpeningByReconstructionImageFilter<TInputImage, TKernel>::GenerateInputRequestedRegion()

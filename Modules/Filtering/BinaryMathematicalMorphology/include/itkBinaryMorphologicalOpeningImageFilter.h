@@ -99,7 +99,7 @@ public:
   itkGetConstMacro(BackgroundValue, PixelType);
 
 protected:
-  BinaryMorphologicalOpeningImageFilter();
+  BinaryMorphologicalOpeningImageFilter() = default;
   ~BinaryMorphologicalOpeningImageFilter() override = default;
   void
   PrintSelf(std::ostream & os, Indent indent) const override;

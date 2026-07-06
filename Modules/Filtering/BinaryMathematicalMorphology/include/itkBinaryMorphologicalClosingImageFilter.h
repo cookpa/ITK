@@ -101,7 +101,7 @@ public:
   itkBooleanMacro(SafeBorder);
   /** @ITKEndGrouping */
 protected:
-  BinaryMorphologicalClosingImageFilter();
+  BinaryMorphologicalClosingImageFilter() = default;
   ~BinaryMorphologicalClosingImageFilter() override = default;
   void
   PrintSelf(std::ostream & os, Indent indent) const override;

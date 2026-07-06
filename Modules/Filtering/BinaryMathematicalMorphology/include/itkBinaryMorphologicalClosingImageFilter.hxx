@@ -38,10 +38,6 @@
 namespace itk
 {
 template <typename TInputImage, typename TOutputImage, typename TKernel>
-BinaryMorphologicalClosingImageFilter<TInputImage, TOutputImage, TKernel>::BinaryMorphologicalClosingImageFilter()
-{}
-
-template <typename TInputImage, typename TOutputImage, typename TKernel>
 void
 BinaryMorphologicalClosingImageFilter<TInputImage, TOutputImage, TKernel>::GenerateData()
 {
