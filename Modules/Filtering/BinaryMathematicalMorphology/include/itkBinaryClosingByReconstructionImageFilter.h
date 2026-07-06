@@ -115,7 +115,7 @@ protected:
   GenerateData() override;
 
 private:
-  InputPixelType m_ForegroundValue{};
+  InputPixelType m_ForegroundValue{ NumericTraits<InputPixelType>::max() };
 
   bool m_FullyConnected{};
 

@@ -110,7 +110,7 @@ protected:
   GenerateData() override;
 
 private:
-  PixelType m_ForegroundValue{};
+  PixelType m_ForegroundValue{ NumericTraits<PixelType>::max() };
 
   PixelType m_BackgroundValue{};
 }; // end of class

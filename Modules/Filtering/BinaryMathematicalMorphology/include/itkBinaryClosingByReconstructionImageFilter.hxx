@@ -32,8 +32,6 @@ namespace itk
 
 template <typename TInputImage, typename TKernel>
 BinaryClosingByReconstructionImageFilter<TInputImage, TKernel>::BinaryClosingByReconstructionImageFilter()
-  : m_ForegroundValue(NumericTraits<InputPixelType>::max())
-
 {}
 
 template <typename TInputImage, typename TKernel>

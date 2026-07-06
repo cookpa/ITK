@@ -39,8 +39,6 @@ namespace itk
 {
 template <typename TInputImage, typename TOutputImage, typename TKernel>
 BinaryMorphologicalClosingImageFilter<TInputImage, TOutputImage, TKernel>::BinaryMorphologicalClosingImageFilter()
-  : m_ForegroundValue(NumericTraits<InputPixelType>::max())
-  , m_SafeBorder(true)
 {}
 
 template <typename TInputImage, typename TOutputImage, typename TKernel>

@@ -215,7 +215,7 @@ protected:
   KernelType m_Kernel{};
 
   /** Pixel value that indicates the object be operated upon */
-  PixelType m_ObjectValue{};
+  PixelType m_ObjectValue{ NumericTraits<PixelType>::OneValue() };
 
   void
   BeforeThreadedGenerateData() override;

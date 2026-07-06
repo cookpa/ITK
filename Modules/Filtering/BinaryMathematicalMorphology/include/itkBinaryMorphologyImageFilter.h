@@ -226,10 +226,10 @@ protected:
 
 private:
   /** Pixel value to dilate */
-  InputPixelType m_ForegroundValue{};
+  InputPixelType m_ForegroundValue{ NumericTraits<InputPixelType>::max() };
 
   /** Pixel value for background */
-  OutputPixelType m_BackgroundValue{};
+  OutputPixelType m_BackgroundValue{ NumericTraits<OutputPixelType>::NonpositiveMin() };
 
   /** Difference sets definition */
   NeighborIndexContainerContainer m_KernelDifferenceSets{};
