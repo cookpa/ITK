@@ -441,10 +441,6 @@ TEST(TernaryGeneratorImageFilter, Constants)
 }
 
 
-// Test that GenerateOutputInformation correctly propagates metadata from input3
-// when inputs 1 and 2 are constants and input types differ (TInputImage2 != TInputImage3).
-// This exercises the code path that was previously broken by a wrong dynamic_cast
-// (TInputImage2 used instead of TInputImage3 for input slot 2).
 TEST(TernaryGeneratorImageFilter, MetadataPropagatedFromInput3WhenOtherInputsAreConstants)
 {
   using Input1Type = itk::Image<float, 3>;
