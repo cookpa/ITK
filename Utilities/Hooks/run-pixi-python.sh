@@ -8,9 +8,15 @@ else
     PYTHON_EXE="./.pixi/envs/pre-commit/bin/python"
 fi
 
-# Verify Python executable exists
+# The pixi env is per-worktree; provision it on first use in fresh worktrees.
+if [[ ! -x "$PYTHON_EXE" ]] && command -v pixi >/dev/null 2>&1; then
+    echo "pre-commit pixi environment missing; running 'pixi install -e pre-commit'..." >&2
+    pixi install -e pre-commit >&2 || true
+fi
+
 if [[ ! -x "$PYTHON_EXE" ]]; then
     echo "Error: Python executable not found at $PYTHON_EXE" >&2
+    echo "Run 'pixi install -e pre-commit' in this checkout to create it." >&2
     exit 1
 fi
 
