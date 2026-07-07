@@ -41,6 +41,14 @@ the [`setup-git-aliases`] script for general Git tasks in ITK.
 Visit the *Pro Git: Setup* resource in [Git Help] for further
 information on setting up your local Git environment.
 
+If you develop in additional [git worktrees], note that the commit-message
+hooks run Python from a [Pixi] environment resolved relative to each
+checkout's root. Provision it once per worktree:
+
+```bash
+pixi install -e pre-commit
+```
+
 (build)=
 Local Build and Testing
 -----------------------
@@ -470,6 +478,8 @@ python_packaging.md
 [build and test ITK]: ./build_test_itk.md
 
 [`SetupForDevelopment.sh`]: https://github.com/InsightSoftwareConsortium/ITK/blob/main/Utilities/SetupForDevelopment.sh
+[git worktrees]: https://git-scm.com/docs/git-worktree
+[Pixi]: https://pixi.sh/
 [`setup-git-aliases`]: https://github.com/InsightSoftwareConsortium/ITK/blob/main/Utilities/GitSetup/setup-git-aliases
 
 [ITK's Discourse]: https://discourse.itk.org/
