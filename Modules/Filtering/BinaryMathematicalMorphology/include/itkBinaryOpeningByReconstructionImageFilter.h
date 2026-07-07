@@ -101,7 +101,7 @@ public:
   itkBooleanMacro(FullyConnected);
   /** @ITKEndGrouping */
 protected:
-  BinaryOpeningByReconstructionImageFilter();
+  BinaryOpeningByReconstructionImageFilter() = default;
   ~BinaryOpeningByReconstructionImageFilter() override = default;
   void
   PrintSelf(std::ostream & os, Indent indent) const override;
@@ -120,7 +120,7 @@ protected:
   GenerateData() override;
 
 private:
-  PixelType m_ForegroundValue{};
+  PixelType m_ForegroundValue{ NumericTraits<PixelType>::max() };
 
   PixelType m_BackgroundValue{};
 

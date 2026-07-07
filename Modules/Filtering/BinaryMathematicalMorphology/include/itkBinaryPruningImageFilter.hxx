@@ -29,7 +29,6 @@ namespace itk
  */
 template <typename TInputImage, typename TOutputImage>
 BinaryPruningImageFilter<TInputImage, TOutputImage>::BinaryPruningImageFilter()
-  : m_Iteration(3)
 {
   this->SetNumberOfRequiredOutputs(1);
 

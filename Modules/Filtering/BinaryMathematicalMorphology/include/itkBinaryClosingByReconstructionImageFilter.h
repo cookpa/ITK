@@ -96,7 +96,7 @@ public:
   itkBooleanMacro(FullyConnected);
   /** @ITKEndGrouping */
 protected:
-  BinaryClosingByReconstructionImageFilter();
+  BinaryClosingByReconstructionImageFilter() = default;
   ~BinaryClosingByReconstructionImageFilter() override = default;
   void
   PrintSelf(std::ostream & os, Indent indent) const override;
@@ -115,7 +115,7 @@ protected:
   GenerateData() override;
 
 private:
-  InputPixelType m_ForegroundValue{};
+  InputPixelType m_ForegroundValue{ NumericTraits<InputPixelType>::max() };
 
   bool m_FullyConnected{};
 
