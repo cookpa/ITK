@@ -49,6 +49,7 @@ itk_fetch_module(
   implementations designed for SimpleITK's requirements. Currently it
   contains a discrete hessian, and a composite filter to compute objectness."
   MODULE_COMPLIANCE_LEVEL 3
-  GIT_REPOSITORY https://github.com/InsightSoftwareConsortium/ITKSimpleITKFilters.git
-  GIT_TAG 526d6c1140d76f2e5e198ff467371c2d74dc25eb
+  GIT_REPOSITORY
+  https://github.com/InsightSoftwareConsortium/ITKSimpleITKFilters.git
+  GIT_TAG 372ab10343df104063ca6a55eb72f7d5fe830d7b
   )
