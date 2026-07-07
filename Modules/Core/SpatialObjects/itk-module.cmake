@@ -14,6 +14,7 @@ itk_module(
     ITKTransform
   PRIVATE_DEPENDS
     ITKCommon
+    ITKZLIB
   COMPILE_DEPENDS
     ITKImageFunction
     ITKMetaIO
