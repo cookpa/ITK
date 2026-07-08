@@ -791,6 +791,7 @@ set(
   itkGreaterGTest.cxx
   itkLessEqualGTest.cxx
   itkLessGTest.cxx
+  itkMaskedAssignImageFilterGTest.cxx
   itkNotEqualGTest.cxx
   itkRoundImageFilterGTest.cxx
   itkSquareImageFilterGTest.cxx

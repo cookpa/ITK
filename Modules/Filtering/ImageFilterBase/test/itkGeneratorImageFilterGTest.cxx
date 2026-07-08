@@ -439,3 +439,39 @@ TEST(TernaryGeneratorImageFilter, Constants)
 
   EXPECT_NEAR(103.0, outputImage->GetPixel(idx), 1e-8);
 }
+
+
+TEST(TernaryGeneratorImageFilter, MetadataPropagatedFromInput3WhenOtherInputsAreConstants)
+{
+  using Input1Type = itk::Image<float, 3>;
+  using Input2Type = itk::Image<unsigned char, 3>;
+  using Input3Type = itk::Image<float, 3>;
+  using OutputType = itk::Image<float, 3>;
+
+  auto                 assignImage = Input3Type::New();
+  Input3Type::SizeType size;
+  size.Fill(7);
+  Input3Type::SpacingType spacing;
+  spacing.Fill(2.5);
+  assignImage->SetRegions(Input3Type::RegionType(size));
+  assignImage->SetSpacing(spacing);
+  assignImage->Allocate();
+  assignImage->FillBuffer(42.0f);
+
+  using FilterType = itk::TernaryGeneratorImageFilter<Input1Type, Input2Type, Input3Type, OutputType>;
+  auto filter = FilterType::New();
+  filter->SetConstant1(0.0f);
+  filter->SetConstant2(static_cast<unsigned char>(1));
+  filter->SetInput3(assignImage);
+  filter->SetFunctor([](float, unsigned char mask, float v3) -> float { return mask ? v3 : 0.0f; });
+
+  EXPECT_NO_THROW(filter->Update());
+
+  const auto * output = filter->GetOutput();
+  ASSERT_TRUE(output != nullptr);
+  EXPECT_EQ(size, output->GetLargestPossibleRegion().GetSize());
+  EXPECT_EQ(spacing, output->GetSpacing());
+
+  const Input3Type::IndexType idx{ { 0, 0, 0 } };
+  EXPECT_NEAR(42.0, output->GetPixel(idx), 1e-6);
+}
