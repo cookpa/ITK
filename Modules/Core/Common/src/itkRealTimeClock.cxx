@@ -110,8 +110,8 @@ RealTimeClock::GetRealTimeStamp() const
   using SecondsCounterType = RealTimeStamp::SecondsCounterType;
   using MicroSecondsCounterType = RealTimeStamp::MicroSecondsCounterType;
 
-  SecondsCounterType      iseconds = std::floor(seconds);
-  MicroSecondsCounterType useconds = std::floor((seconds - iseconds) * 1e6);
+  SecondsCounterType      iseconds = itk::Math::Floor<SecondsCounterType>(seconds);
+  MicroSecondsCounterType useconds = itk::Math::Floor<MicroSecondsCounterType>((seconds - iseconds) * 1e6);
 
   RealTimeStamp value(iseconds, useconds);
   return value;
