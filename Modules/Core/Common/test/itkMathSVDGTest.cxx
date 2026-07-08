@@ -17,12 +17,16 @@
  *=========================================================================*/
 
 // First include the header file to be tested:
+#include "itkMatrix.h"
 #include "itkMathSVD.h"
 
 // This test cross-checks against the vnl_svd reference engine; mark it so it keeps
-// compiling once vnl_svd is deprecated under ITK_LEGACY_REMOVE.
-#define ITK_LEGACY_TEST
-#include "vnl/algo/vnl_svd.h"
+// compiling once vnl_svd is deprecated under ITK_LEGACY_REMOVE. The oracle is
+// unavailable under ITK_FUTURE_LEGACY_REMOVE.
+#ifndef ITK_FUTURE_LEGACY_REMOVE
+#  define ITK_LEGACY_TEST
+#  include "vnl/algo/vnl_svd.h"
+#endif
 
 #include <gtest/gtest.h>
 #include <cmath>
@@ -76,6 +80,7 @@ TEST(MathSVD, FixedReconstructs)
   }
 }
 
+#ifndef ITK_FUTURE_LEGACY_REMOVE
 // Singular values agree with vnl_svd (the engine being supplemented).
 TEST(MathSVD, SingularValuesMatchVnl)
 {
@@ -85,6 +90,7 @@ TEST(MathSVD, SingularValuesMatchVnl)
   for (unsigned int i = 0; i < 6; ++i)
     EXPECT_NEAR(r.W[i], ref.W()(i, i), 1e-12);
 }
+#endif // ITK_FUTURE_LEGACY_REMOVE
 
 // Default canonicalization makes the largest-magnitude element of each U column
 // positive, giving a deterministic, build-independent sign convention.
@@ -106,6 +112,7 @@ TEST(MathSVD, SignsCanonical)
   }
 }
 
+#ifndef ITK_FUTURE_LEGACY_REMOVE
 // U V^T is invariant to the SVD sign/basis ambiguity: it matches vnl_svd even
 // for a degenerate (repeated singular value) matrix. This is the property the
 // geometry call sites (orthogonalization) rely on.
@@ -143,6 +150,7 @@ TEST(MathSVD, UVtransposeInvariantOnDegenerate)
       diff = std::max(diff, std::abs(rotEig(i, j) - rotVnl(i, j)));
   EXPECT_LT(diff, 1e-12);
 }
+#endif // ITK_FUTURE_LEGACY_REMOVE
 
 // The itk::Matrix overload forwards to the same computation.
 TEST(MathSVD, ItkMatrixOverload)
@@ -186,9 +194,11 @@ TEST(MathSVD, DynamicReconstructs)
       }
     EXPECT_LT(err, 1e-11) << "n=" << n;
 
+#ifndef ITK_FUTURE_LEGACY_REMOVE
     const vnl_svd<double> ref(A);
     for (unsigned int i = 0; i < n; ++i)
       EXPECT_NEAR(r.W[i], ref.W()(i, i), 1e-11) << "n=" << n << " i=" << i;
+#endif
   }
 }
 
@@ -202,14 +212,16 @@ TEST(MathSVD, DynamicRejectsEmpty)
 // PseudoInverse() agrees with vnl_svd and satisfies the Moore-Penrose identity.
 TEST(MathSVD, PseudoInverseMatchesVnl)
 {
-  const auto               A = MakeFixed<double, 6>();
-  const auto               pinv = itk::Math::SVD(A).PseudoInverse();
+  const auto A = MakeFixed<double, 6>();
+  const auto pinv = itk::Math::SVD(A).PseudoInverse();
+#ifndef ITK_FUTURE_LEGACY_REMOVE
   const vnl_matrix<double> pinvVnl = vnl_svd<double>(A.as_matrix()).pinverse();
   double                   dInv = 0.0;
   for (unsigned int i = 0; i < 6; ++i)
     for (unsigned int j = 0; j < 6; ++j)
       dInv = std::max(dInv, std::abs(pinv(i, j) - pinvVnl(i, j)));
   EXPECT_LT(dInv, 1e-10);
+#endif
 
   // A * A^+ * A == A
   const vnl_matrix_fixed<double, 6, 6> recon = A * pinv * A;
@@ -234,10 +246,32 @@ TEST(MathSVD, SolveMatchesVnl)
   const vnl_vector_fixed<double, 4> residual = A * x - b;
   EXPECT_LT(residual.inf_norm(), 1e-10);
 
+#ifndef ITK_FUTURE_LEGACY_REMOVE
   // agrees with vnl_svd's solve
   const vnl_vector<double> xVnl = vnl_svd<double>(A.as_matrix()).solve(b.as_vector());
   EXPECT_LT((x.as_vector() - xVnl).inf_norm(), 1e-10);
+#endif
 }
+
+#ifndef ITK_FUTURE_LEGACY_REMOVE
+// WellCondition() (sigma_min/sigma_max) agrees with vnl_svd::well_condition(),
+// the accessor the NIfTI direction-cosine check migrated onto.
+TEST(MathSVD, WellConditionMatchesVnl)
+{
+  const auto A = MakeFixed<double, 5>();
+  EXPECT_NEAR(itk::Math::SVD(A).WellCondition(), vnl_svd<double>(A.as_matrix()).well_condition(), 1e-12);
+}
+
+// DeterminantMagnitude() (product of singular values) agrees with
+// vnl_svd::determinant_magnitude(), the accessor the Mahalanobis check migrated onto.
+TEST(MathSVD, DeterminantMagnitudeMatchesVnl)
+{
+  const auto   A = MakeFixed<double, 5>();
+  const double itkDet = itk::Math::SVD(A).DeterminantMagnitude();
+  const double vnlDet = vnl_svd<double>(A.as_matrix()).determinant_magnitude();
+  EXPECT_NEAR(itkDet, vnlDet, 1e-10 * std::abs(vnlDet));
+}
+#endif // ITK_FUTURE_LEGACY_REMOVE
 
 // rank() reports full rank for a well-conditioned matrix and the reduced rank of
 // a deliberately rank-deficient one.
@@ -270,13 +304,15 @@ TEST(MathSVD, IllConditionedMatchesVnl)
     for (unsigned int j = 0; j < N; ++j)
       A(i, j) = 1.0 / (i + j + 1.0); // Hilbert
 
-  const auto            r = itk::Math::SVD(A);
-  const vnl_svd<double> ref(A);
+  const auto r = itk::Math::SVD(A);
 
+#ifndef ITK_FUTURE_LEGACY_REMOVE
   // singular values agree relative to the largest
-  const double wmax = r.W[0];
+  const vnl_svd<double> ref(A);
+  const double          wmax = r.W[0];
   for (unsigned int i = 0; i < N; ++i)
     EXPECT_NEAR(r.W[i], ref.W()(i, i), 1e-9 * wmax) << "i=" << i;
+#endif
 
   // reconstruction A == U diag(W) V^T is well-conditioned and stays ~machine eps
   double err = 0.0;
@@ -439,15 +475,17 @@ TEST(MathSVD, Rectangular)
     EXPECT_LT(reconErr, 1e-12) << "m=" << m << " n=" << n;
 
     // PseudoInverse is n x m and matches vnl_svd
-    const auto               pinv = r.PseudoInverse();
-    const vnl_matrix<double> pinvVnl = vnl_svd<double>(A).pinverse();
+    const auto pinv = r.PseudoInverse();
     EXPECT_EQ(pinv.rows(), n);
     EXPECT_EQ(pinv.cols(), m);
-    double pinvErr = 0.0;
+#ifndef ITK_FUTURE_LEGACY_REMOVE
+    const vnl_matrix<double> pinvVnl = vnl_svd<double>(A).pinverse();
+    double                   pinvErr = 0.0;
     for (unsigned int i = 0; i < n; ++i)
       for (unsigned int j = 0; j < m; ++j)
         pinvErr = std::max(pinvErr, std::abs(pinv(i, j) - pinvVnl(i, j)));
     EXPECT_LT(pinvErr, 1e-10) << "m=" << m << " n=" << n;
+#endif
 
     // Moore-Penrose: A A^+ A == A
     const vnl_matrix<double> recon = A * pinv * A;
@@ -471,7 +509,117 @@ TEST(MathSVD, RectangularSolveMatchesVnl)
     b[i] = static_cast<double>(i) - 1.5;
 
   const vnl_vector<double> x = itk::Math::SVD(A).Solve(b);
-  const vnl_vector<double> xVnl = vnl_svd<double>(A).solve(b);
   EXPECT_EQ(x.size(), 3u);
+#ifndef ITK_FUTURE_LEGACY_REMOVE
+  const vnl_vector<double> xVnl = vnl_svd<double>(A).solve(b);
   EXPECT_LT((x - xVnl).inf_norm(), 1e-10);
+#endif
+}
+
+// NullVector() matches vnl_svd::nullvector() up to sign, and lies in the nullspace.
+TEST(MathSVD, NullVector)
+{
+  // Rank-2 square 3x3: third row = row0 + row1.
+  vnl_matrix<double> A(3, 3);
+  A(0, 0) = 1.0;
+  A(0, 1) = 2.0;
+  A(0, 2) = 3.0;
+  A(1, 0) = 4.0;
+  A(1, 1) = 5.0;
+  A(1, 2) = 6.0;
+  for (unsigned int j = 0; j < 3; ++j)
+    A(2, j) = A(0, j) + A(1, j);
+
+  const vnl_vector<double> nv = itk::Math::SVD(A).NullVector();
+  EXPECT_LT((A * nv).inf_norm(), 1e-12);
+
+#ifndef ITK_FUTURE_LEGACY_REMOVE
+  const vnl_vector<double> nvVnl = vnl_svd<double>(A).nullvector();
+  const double             align = std::abs(dot_product(nv, nvVnl)) / (nv.magnitude() * nvVnl.magnitude());
+  EXPECT_NEAR(align, 1.0, 1e-12);
+#endif
+
+  // Fixed-size overload agrees.
+  vnl_matrix_fixed<double, 3, 3> Af;
+  Af.copy_in(A.data_block());
+  const vnl_vector_fixed<double, 3> nvf = itk::Math::SVD(Af).NullVector();
+  EXPECT_LT((A * nvf.as_vector()).inf_norm(), 1e-12);
+}
+
+// NullVector() refuses an underdetermined input whose thin V cannot span the nullspace.
+TEST(MathSVD, NullVectorRejectsUnderdetermined)
+{
+  vnl_matrix<double> A(2, 4);
+  A.fill(1.0);
+  A(0, 1) = 2.0;
+  A(1, 3) = 3.0;
+  EXPECT_THROW(itk::Math::SVD(A).NullVector(), itk::ExceptionObject);
+}
+
+// RecomposeWith() reproduces A for unmodified W and honors hand-edited values.
+TEST(MathSVD, RecomposeWith)
+{
+  const auto Af = MakeFixed<double, 4>();
+  const auto r = itk::Math::SVD(Af);
+
+  const vnl_matrix_fixed<double, 4, 4> same = r.RecomposeWith(r.W);
+  double                               err = 0.0;
+  for (unsigned int i = 0; i < 4; ++i)
+    for (unsigned int j = 0; j < 4; ++j)
+      err = std::max(err, std::abs(same(i, j) - Af(i, j)));
+  EXPECT_LT(err, 1e-12);
+
+  // Zeroing the tail value reproduces the rank-truncated Recompose().
+  vnl_vector_fixed<double, 4> wMod = r.W;
+  wMod[3] = 0.0;
+  const vnl_matrix_fixed<double, 4, 4> truncated = r.RecomposeWith(wMod);
+  // Truncate via rcond just above the smallest normalized singular value.
+  const double                         rcond = (r.W[3] / r.W[0]) * (1.0 + 1e-6);
+  const vnl_matrix_fixed<double, 4, 4> viaRcond = r.Recompose(rcond);
+  for (unsigned int i = 0; i < 4; ++i)
+    for (unsigned int j = 0; j < 4; ++j)
+      EXPECT_NEAR(truncated(i, j), viaRcond(i, j), 1e-12);
+
+  // Inverted values give the transposed pseudo-inverse: U diag(1/w) V^T == (A^+)^T.
+  vnl_vector_fixed<double, 4> wInv;
+  for (unsigned int k = 0; k < 4; ++k)
+    wInv[k] = 1.0 / r.W[k];
+  const vnl_matrix_fixed<double, 4, 4> recomposedInv = r.RecomposeWith(wInv);
+  const vnl_matrix_fixed<double, 4, 4> pinvT = r.PseudoInverse(0.0).transpose();
+  for (unsigned int i = 0; i < 4; ++i)
+    for (unsigned int j = 0; j < 4; ++j)
+      EXPECT_NEAR(recomposedInv(i, j), pinvT(i, j), 1e-10);
+}
+
+// Fixed rectangular overload: factors match the dynamic path and the
+// pseudo-inverse matches the vnl_svd reference (the itkTransform Jacobian use).
+TEST(MathSVD, FixedRectangular)
+{
+  constexpr unsigned int               rows = 5;
+  constexpr unsigned int               cols = 3;
+  vnl_matrix_fixed<double, rows, cols> Af;
+  for (unsigned int i = 0; i < rows; ++i)
+    for (unsigned int j = 0; j < cols; ++j)
+      Af(i, j) = std::cos(0.4 * i + 0.9 * j) + (i == j ? 2.0 : 0.0);
+
+  const auto rf = itk::Math::SVD(Af);
+  const auto rd = itk::Math::SVD(vnl_matrix<double>(Af.as_matrix()));
+  for (unsigned int k = 0; k < 3; ++k)
+    EXPECT_NEAR(rf.W[k], rd.W[k], 1e-12);
+
+#ifndef ITK_FUTURE_LEGACY_REMOVE
+  const vnl_matrix_fixed<double, cols, rows> pinv = rf.PseudoInverse();
+  const vnl_matrix<double>                   pinvVnl = vnl_svd<double>(Af.as_matrix()).inverse();
+  for (unsigned int i = 0; i < cols; ++i)
+    for (unsigned int j = 0; j < rows; ++j)
+      EXPECT_NEAR(pinv(i, j), pinvVnl(i, j), 1e-10);
+#endif
+
+  // NullVector on an overdetermined fixed shape lies in the nullspace of a
+  // rank-deficient input (third column = sum of the first two).
+  vnl_matrix_fixed<double, rows, cols> Adef = Af;
+  for (unsigned int i = 0; i < rows; ++i)
+    Adef(i, 2) = Adef(i, 0) + Adef(i, 1);
+  const vnl_vector_fixed<double, cols> nv = itk::Math::SVD(Adef).NullVector();
+  EXPECT_LT((Adef.as_matrix() * nv.as_vector()).inf_norm(), 1e-12);
 }

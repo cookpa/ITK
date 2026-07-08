@@ -15,10 +15,16 @@
  *  limitations under the License.
  *
  *=========================================================================*/
+#define ITK_LEGACY_TEST
 #include "itkGTest.h"
+#include "itkConfigure.h"
 #include <iostream>
 
-#include "vnl/algo/vnl_svd.h"
+// This converted legacy test exercises vnl_svd, which is unavailable under
+// ITK_FUTURE_LEGACY_REMOVE.
+#ifndef ITK_FUTURE_LEGACY_REMOVE
+
+#  include "vnl/algo/vnl_svd.h"
 
 namespace
 {
@@ -77,3 +83,5 @@ TEST(Numerics, ConvertedLegacyTest)
   EXPECT_NEAR(result(1, 0), 7.0 / 3.0, 1e-6);
   EXPECT_NEAR(result(2, 0), -7.0 / 6.0, 1e-6);
 }
+
+#endif // ITK_FUTURE_LEGACY_REMOVE
