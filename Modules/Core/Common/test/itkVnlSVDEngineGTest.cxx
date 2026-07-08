@@ -21,12 +21,17 @@
 // core/vnl/algo/tests/test_svd.cxx so the coverage runs in ITK CI and guards
 // any future change of the underlying SVD engine.
 
-#define ITK_LEGACY_TEST
-#include "vnl/algo/vnl_svd.h"
-#include "vnl/vnl_random.h"
+#include "itkConfigure.h"
 
-#include <gtest/gtest.h>
-#include <complex>
+// The deprecated engine under test is unavailable under ITK_FUTURE_LEGACY_REMOVE.
+#ifndef ITK_FUTURE_LEGACY_REMOVE
+
+#  define ITK_LEGACY_TEST
+#  include "vnl/algo/vnl_svd.h"
+#  include "vnl/vnl_random.h"
+
+#  include <gtest/gtest.h>
+#  include <complex>
 
 namespace
 {
@@ -186,3 +191,5 @@ TEST(VnlSVDEngine, Nullvector)
   nullvector<std::complex<float>>(1e-5, rng);
   nullvector<std::complex<double>>(1e-12, rng);
 }
+
+#endif // ITK_FUTURE_LEGACY_REMOVE
