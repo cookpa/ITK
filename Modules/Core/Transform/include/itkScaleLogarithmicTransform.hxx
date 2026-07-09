@@ -77,7 +77,8 @@ ScaleLogarithmicTransform<TParametersValueType, VDimension>::ComputeJacobianWith
   const InputPointType & p,
   JacobianType &         jacobian) const
 {
-  const ScaleType & scales = this->GetScale();
+  const ScaleType &      scales = this->GetScale();
+  const InputPointType & center = this->GetCenter();
 
   jacobian.SetSize(SpaceDimension, this->GetNumberOfLocalParameters());
   jacobian.Fill(0);
@@ -85,7 +86,7 @@ ScaleLogarithmicTransform<TParametersValueType, VDimension>::ComputeJacobianWith
   {
     // the derivative with respect to Log(scale) = scale * derivative with
     // respect to scale.
-    jacobian(dim, dim) = scales[dim] * p[dim];
+    jacobian(dim, dim) = scales[dim] * (p[dim] - center[dim]);
   }
 }
 

@@ -16,6 +16,7 @@
  *
  *=========================================================================*/
 
+#include <cmath>
 #include <iostream>
 
 #include "itkScaleLogarithmicTransform.h"
@@ -263,6 +264,53 @@ itkScaleLogarithmicTransformTest(int, char *[])
 
       std::cout << "Successful SetParameters() / GetParameters() " << std::endl;
     }
+  }
+
+
+  // Exercise the Jacobian about a non-zero center
+  {
+    auto centeredTransform = TransformType::New();
+
+    TransformType::InputPointType center;
+    center[0] = 5;
+    center[1] = 6;
+    center[2] = 7;
+    centeredTransform->SetCenter(center);
+
+    TransformType::ParametersType parameters = centeredTransform->GetParameters();
+    parameters[0] = std::log(2.0);
+    parameters[1] = std::log(3.0);
+    parameters[2] = std::log(4.0);
+    centeredTransform->SetParameters(parameters);
+
+    constexpr TransformType::InputPointType::ValueType pInit[3]{ 10, 10, 10 };
+    const TransformType::InputPointType                p = pInit;
+
+    TransformType::JacobianType jacobian;
+    centeredTransform->ComputeJacobianWithRespectToParameters(p, jacobian);
+
+    const TransformType::ScaleType & scales = centeredTransform->GetScale();
+
+    testStatus = true;
+    for (unsigned int i = 0; i < N; ++i)
+    {
+      // d/dLog(scale[i]) of scale[i] * (p[i] - center[i]) + center[i]
+      const double expected = scales[i] * (p[i] - center[i]);
+      if (itk::Math::Absolute(jacobian(i, i) - expected) > epsilon)
+      {
+        testStatus = false;
+        break;
+      }
+    }
+    if (!testStatus)
+    {
+      std::cerr << "Error in ComputeJacobianWithRespectToParameters()." << std::endl;
+      std::cerr << "The center of the transformation was ignored." << std::endl;
+      std::cerr << "Jacobian: " << jacobian << std::endl;
+      return EXIT_FAILURE;
+    }
+
+    std::cout << "Successful ComputeJacobianWithRespectToParameters() " << std::endl;
   }
 
 
