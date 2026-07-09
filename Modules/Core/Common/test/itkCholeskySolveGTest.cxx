@@ -38,11 +38,17 @@ MakeSPD(unsigned int n)
 {
   vnl_matrix<T> R(n, n);
   for (unsigned int i = 0; i < n; ++i)
+  {
     for (unsigned int j = 0; j < n; ++j)
+    {
       R(i, j) = static_cast<T>(std::sin(0.7 * (i + 1) * (j + 2)) + 0.3 * (i + 1));
+    }
+  }
   vnl_matrix<T> A = R * R.transpose();
   for (unsigned int i = 0; i < n; ++i)
+  {
     A(i, i) += static_cast<T>(n);
+  }
   return A;
 }
 } // namespace
@@ -55,7 +61,9 @@ TEST(CholeskySolve, SolveResidual)
   const vnl_matrix<double> A = MakeSPD<double>(n);
   vnl_vector<double>       b(n);
   for (unsigned int i = 0; i < n; ++i)
+  {
     b[i] = static_cast<double>(i) - 1.5;
+  }
 
   const vnl_vector<double> x = itk::Math::SolveSymmetricPositiveDefinite(A, b);
   const vnl_vector<double> residual = A * x - b;
@@ -72,8 +80,12 @@ TEST(CholeskySolve, LowerTriangleReconstructsMatrix)
 
   // L is lower triangular.
   for (unsigned int i = 0; i < n; ++i)
+  {
     for (unsigned int j = i + 1; j < n; ++j)
+    {
       EXPECT_NEAR(L(i, j), 0.0, 1e-12);
+    }
+  }
 
   const vnl_matrix<double> reconstructed = L * L.transpose();
   EXPECT_LT((reconstructed - A).fro_norm() / A.fro_norm(), 1e-12);
@@ -88,7 +100,9 @@ TEST(CholeskySolve, EquivalentToVnlCholesky)
   const vnl_matrix<double> A = MakeSPD<double>(n);
   vnl_vector<double>       b(n);
   for (unsigned int i = 0; i < n; ++i)
+  {
     b[i] = std::cos(0.5 * (i + 1));
+  }
 
   const vnl_vector<double> xItk = itk::Math::SolveSymmetricPositiveDefinite(A, b);
 
@@ -107,7 +121,9 @@ TEST(CholeskySolve, FloatResidual)
   const vnl_matrix<float> A = MakeSPD<float>(n);
   vnl_vector<float>       b(n);
   for (unsigned int i = 0; i < n; ++i)
+  {
     b[i] = static_cast<float>(i) + 0.25f;
+  }
 
   const vnl_vector<float> x = itk::Math::SolveSymmetricPositiveDefinite(A, b);
   const vnl_vector<float> residual = A * x - b;
