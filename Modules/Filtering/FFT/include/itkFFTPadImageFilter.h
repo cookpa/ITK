@@ -81,12 +81,11 @@ public:
    * Set/Get the greatest prime factor allowed on the size of the padded image.
    *
    * The filter increases the dimensional sizes of the image to reach a size with the greatest
-   * prime factor smaller or equal to the specified value. The default values is
-   * obtained from the ForwardFFTImageFilter, which is 13 for FFTW,
-   * and 5 for VNL.
+   * prime factor smaller or equal to the specified value. The default value is
+   * obtained from the ForwardFFTImageFilter, which is 13 for FFTW (7 with cuFFTW)
+   * and 11 for PocketFFT.
    *
-   * A greatest prime factor of 2 produce a size which is a power of 2, and thus
-   * is suitable for vnl base fft filters.
+   * A greatest prime factor of 2 produces a size which is a power of 2.
    * A greatest prime factor of 1 or less - typically 0 - disable the extra padding.
    */
   /** @ITKStartGrouping */
