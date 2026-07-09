@@ -38,7 +38,13 @@
 #  include "vnl/algo/vnl_matrix_inverse.h"
 #  undef ITK_VNL_SVD_TRANSITIONAL_INCLUDE
 #endif
-#include "vnl/algo/vnl_determinant.h"
+#include "itkMathDeterminant.h"
+// GetInverse's singular check is Eigen-backed via itk::Math::Determinant, but
+// ITK 5.4 exposed vnl_determinant transitively through this header; keep it
+// reachable during the deprecation window so downstream code still compiles.
+#if !defined(ITK_LEGACY_REMOVE) && !defined(ITK_FUTURE_LEGACY_REMOVE)
+#  include "vnl/algo/vnl_determinant.h"
+#endif
 #include "itkMath.h"
 #include <type_traits> // For is_same.
 
@@ -323,7 +329,7 @@ public:
   [[nodiscard]] inline vnl_matrix_fixed<T, VColumns, VRows>
   GetInverse() const
   {
-    if (vnl_determinant(m_Matrix) == T{})
+    if (Math::Determinant(m_Matrix) == T{})
     {
       itkGenericExceptionMacro("Singular matrix. Determinant is 0.");
     }

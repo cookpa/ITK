@@ -19,7 +19,7 @@
 #define itkHexahedronCell_hxx
 #include "itkMath.h"
 #include "vnl/vnl_matrix_fixed.h"
-#include "vnl/algo/vnl_determinant.h"
+#include "itkMathDeterminant.h"
 
 #include <algorithm> // For copy_n.
 
@@ -398,7 +398,7 @@ HexahedronCell<TCellInterface>::EvaluatePosition(CoordinateType *          x,
     }
 
     // ONLY 3x3 determinants are supported.
-    const double d = vnl_determinant(mat);
+    const double d = Math::Determinant(mat);
     // spell-check-disable
     // d=vtkMath::Determinant3x3(rcol,scol,tcol);
     // spell-check-enable
@@ -431,9 +431,9 @@ HexahedronCell<TCellInterface>::EvaluatePosition(CoordinateType *          x,
       mat3.put(2, i, fcol[i]);
     }
     double params[Self::CellDimension3D]{ 0.5, 0.5, 0.5 };
-    pcoords[0] = params[0] - vnl_determinant(mat1) / d;
-    pcoords[1] = params[1] - vnl_determinant(mat2) / d;
-    pcoords[2] = params[2] - vnl_determinant(mat3) / d;
+    pcoords[0] = params[0] - Math::Determinant(mat1) / d;
+    pcoords[1] = params[1] - Math::Determinant(mat2) / d;
+    pcoords[2] = params[2] - Math::Determinant(mat3) / d;
 
     if (pcoord)
     {

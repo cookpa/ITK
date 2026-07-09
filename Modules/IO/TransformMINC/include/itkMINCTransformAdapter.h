@@ -24,7 +24,6 @@
 #include "itkCovariantVector.h"
 #include "vnl/vnl_matrix_fixed.h"
 #include "vnl/vnl_vector_fixed.h"
-#include "vnl/vnl_det.h"
 #include "vnl/vnl_vector_fixed_ref.h"
 #include "vnl/vnl_vector.h"
 #include "itkTransform.h"

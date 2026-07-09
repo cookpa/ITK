@@ -26,7 +26,6 @@
 #if !defined(ITK_LEGACY_REMOVE) && !defined(ITK_FUTURE_LEGACY_REMOVE)
 #  include "vnl/algo/vnl_matrix_inverse.h" // transitional transitive include; dropped on ITK legacy removal
 #endif
-#include "vnl/algo/vnl_determinant.h"
 #include "itkArray.h"
 
 #include "itkDistanceMetric.h"

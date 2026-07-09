@@ -18,7 +18,7 @@
 #ifndef itkQuadrilateralCell_hxx
 #define itkQuadrilateralCell_hxx
 #include "itkMath.h"
-#include "vnl/algo/vnl_determinant.h"
+#include "itkMathDeterminant.h"
 
 #include <algorithm> // For copy_n.
 
@@ -333,7 +333,7 @@ QuadrilateralCell<TCellInterface>::EvaluatePosition(CoordinateType *          x,
       mat.put(1, i, scol[i]);
     }
 
-    const double d = vnl_determinant(mat);
+    const double d = Math::Determinant(mat);
     // spell-check-disable
     // d=vtkMath::Determinant2x2(rcol,scol);
     // spell-check-enable
@@ -356,8 +356,8 @@ QuadrilateralCell<TCellInterface>::EvaluatePosition(CoordinateType *          x,
       mat2.put(1, i, fcol[i]);
     }
 
-    pcoords[0] = params[0] - vnl_determinant(mat1) / d;
-    pcoords[1] = params[1] - vnl_determinant(mat2) / d;
+    pcoords[0] = params[0] - Math::Determinant(mat1) / d;
+    pcoords[1] = params[1] - Math::Determinant(mat2) / d;
 
     if (pcoord)
     {

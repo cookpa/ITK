@@ -23,7 +23,6 @@
 #include "itkVector.h"
 #include "vnl/vnl_matrix_fixed.h"
 #include "vnl/vnl_vector_fixed.h"
-#include "vnl/vnl_det.h"
 
 namespace itk
 {
@@ -221,7 +220,7 @@ protected:
   BeforeThreadedGenerateData() override;
 
   /** DisplacementFieldJacobianDeterminantFilter can be implemented as a
-   * multithreaded filter (we're only using vnl_det(), which is trivially
+   * multithreaded filter (the determinant computation is trivially
    * thread safe).  Therefore, this implementation provides a
    * DynamicThreadedGenerateData() routine which is called for each
    * processing thread. The output image data is allocated

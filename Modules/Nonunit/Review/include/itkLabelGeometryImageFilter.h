@@ -25,7 +25,7 @@
 #include <map>
 #include <vector>
 #include "itkSymmetricEigenDecomposition.h"
-#include "vnl/vnl_det.h"
+#include "itkMathDeterminant.h"
 #include "itkMath.h"
 
 namespace itk

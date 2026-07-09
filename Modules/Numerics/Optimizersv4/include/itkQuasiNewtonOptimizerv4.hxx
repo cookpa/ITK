@@ -386,7 +386,7 @@ QuasiNewtonOptimizerv4Template<TInternalComputationValueType>::ComputeHessianAnd
 
   TInternalComputationValueType threshold = NumericTraits<TInternalComputationValueType>::epsilon();
 
-  if (itk::Math::Absolute(vnl_determinant(newHessian)) <= threshold)
+  if (itk::Math::Absolute(Math::Determinant(newHessian)) <= threshold)
   {
     return false;
   }
