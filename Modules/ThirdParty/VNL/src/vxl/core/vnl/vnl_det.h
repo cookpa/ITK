@@ -1,6 +1,19 @@
 // This is core/vnl/vnl_det.h
 #ifndef vnl_det_h_
 #define vnl_det_h_
+
+#if __has_include(<itkConfigure.h>)
+#  include <itkConfigure.h>
+#  if defined(ITK_FUTURE_LEGACY_REMOVE)
+#    error "vnl_det was removed; migrate to itk::Math::Determinant (itkMathDeterminant.h, Eigen-backed)."
+#  elif defined(ITK_LEGACY_REMOVE) && !defined(ITK_LEGACY_SILENT) && !defined(ITK_LEGACY_TEST)
+#    if defined(_MSC_VER)
+#      pragma message("vnl_det is deprecated; migrate to itk::Math::Determinant.")
+#    else
+#      warning "vnl_det is deprecated; migrate to itk::Math::Determinant."
+#    endif
+#  endif
+#endif
 //:
 //  \file
 //  \brief Direct evaluation of 2x2, 3x3 and 4x4 determinants.

@@ -1,6 +1,19 @@
 // This is core/vnl/algo/vnl_determinant.h
 #ifndef vnl_algo_determinant_h_
 #define vnl_algo_determinant_h_
+
+#if __has_include(<itkConfigure.h>)
+#  include <itkConfigure.h>
+#  if defined(ITK_FUTURE_LEGACY_REMOVE)
+#    error "vnl_determinant was removed; migrate to itk::Math::Determinant (itkMathDeterminant.h, Eigen-backed)."
+#  elif defined(ITK_LEGACY_REMOVE) && !defined(ITK_LEGACY_SILENT) && !defined(ITK_LEGACY_TEST)
+#    if defined(_MSC_VER)
+#      pragma message("vnl_determinant is deprecated; migrate to itk::Math::Determinant.")
+#    else
+#      warning "vnl_determinant is deprecated; migrate to itk::Math::Determinant."
+#    endif
+#  endif
+#endif
 //:
 // \file
 // \brief calculates the determinant of a matrix
