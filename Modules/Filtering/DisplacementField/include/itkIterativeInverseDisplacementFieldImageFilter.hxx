@@ -93,7 +93,6 @@ IterativeInverseDisplacementFieldImageFilter<TInputImage, TOutputImage>::Generat
     const FieldInterpolatorPointer inputFieldInterpolator = FieldInterpolatorType::New();
     inputFieldInterpolator->SetInputImage(inputPtr);
 
-    double smallestError = 0;
     InputIt.GoToBegin();
     OutputIt.GoToBegin();
     while (!OutputIt.IsAtEnd())
@@ -105,6 +104,9 @@ IterativeInverseDisplacementFieldImageFilter<TInputImage, TOutputImage>::Generat
 
       int    stillSamePoint = 0;
       double step = spacing;
+
+      // Reset per pixel: an unevaluable initial guess must not inherit the previous pixel's error bar.
+      double smallestError = NumericTraits<double>::max();
 
       // get the required displacement
       OutputImagePixelType displacement = OutputIt.Get();

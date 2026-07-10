@@ -198,3 +198,9 @@ itk_add_test(
     ITKDisplacementFieldTestDriver
     itkExponentialDisplacementFieldImageFilterTest
 )
+
+set(
+  ITKDisplacementFieldGTests
+  itkIterativeInverseDisplacementFieldImageFilterGTest.cxx
+)
+creategoogletestdriver(ITKDisplacementField "${ITKDisplacementField-Test_LIBRARIES}" "${ITKDisplacementFieldGTests}")
