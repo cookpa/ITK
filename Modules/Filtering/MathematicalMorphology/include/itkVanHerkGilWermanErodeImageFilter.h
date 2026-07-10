@@ -38,7 +38,6 @@ public:
 template <typename TImage, typename TKernel>
 class VanHerkGilWermanErodeImageFilter
   : public VanHerkGilWermanErodeDilateImageFilter<TImage, TKernel, MinFunctor<typename TImage::PixelType>>
-
 {
 public:
   ITK_DISALLOW_COPY_AND_MOVE(VanHerkGilWermanErodeImageFilter);

@@ -23,7 +23,6 @@ namespace itk
 /** Constructor */
 SingleValuedNonLinearVnlOptimizer::SingleValuedNonLinearVnlOptimizer()
   : m_CostFunctionAdaptor(nullptr)
-
 {
   m_Command = CommandType::New();
   m_Command->SetCallbackFunction(this, &SingleValuedNonLinearVnlOptimizer::IterationReport);

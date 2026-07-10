@@ -24,7 +24,6 @@ namespace itk
 
 template <typename TOutputMesh>
 MeshSource<TOutputMesh>::MeshSource()
-
 {
   // Create the output. We use static_cast<> here because we know the default
   // output must be of type TOutputMesh

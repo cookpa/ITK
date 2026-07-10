@@ -33,7 +33,6 @@ ConstantVelocityFieldTransform<TParametersValueType, VDimension>::ConstantVeloci
   , m_LowerTimeBound(0.0)
   , m_UpperTimeBound(1.0)
   , m_NumberOfIntegrationSteps(10)
-
 {
   this->m_FixedParameters.SetSize(ConstantVelocityFieldDimension * (ConstantVelocityFieldDimension + 3));
   this->m_FixedParameters.Fill(0.0);

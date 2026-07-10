@@ -52,7 +52,6 @@ class AreaOpeningImageFilter
                                               TOutputImage,
                                               TAttribute,
                                               std::greater<typename TInputImage::PixelType>>
-
 {
 public:
   ITK_DISALLOW_COPY_AND_MOVE(AreaOpeningImageFilter);

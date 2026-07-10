@@ -24,7 +24,6 @@ namespace itk
 
 template <typename TInputPath, typename TOutputChainCodePath>
 PathToChainCodePathFilter<TInputPath, TOutputChainCodePath>::PathToChainCodePathFilter()
-
 {
   this->SetNumberOfRequiredInputs(1);
 }

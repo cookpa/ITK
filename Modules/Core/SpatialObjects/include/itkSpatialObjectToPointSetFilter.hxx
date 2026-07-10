@@ -24,7 +24,6 @@ namespace itk
 
 template <typename TPointBasedSpatialObject, typename TOutputPointSet>
 SpatialObjectToPointSetFilter<TPointBasedSpatialObject, TOutputPointSet>::SpatialObjectToPointSetFilter()
-
 {
   this->SetNumberOfRequiredInputs(1);
 }

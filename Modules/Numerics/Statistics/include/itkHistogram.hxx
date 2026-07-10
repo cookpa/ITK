@@ -29,7 +29,6 @@ Histogram<TMeasurement, TFrequencyContainer>::Histogram()
   : m_Size(0)
   , m_OffsetTable(OffsetTableType(Superclass::GetMeasurementVectorSize() + 1))
   , m_FrequencyContainer(FrequencyContainerType::New())
-
 {
   for (unsigned int i = 0; i < this->GetMeasurementVectorSize() + 1; ++i)
   {

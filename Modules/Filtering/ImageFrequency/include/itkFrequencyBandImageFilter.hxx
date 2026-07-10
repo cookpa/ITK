@@ -30,7 +30,6 @@ template <typename TImageType, typename TFrequencyIterator>
 FrequencyBandImageFilter<TImageType, TFrequencyIterator>::FrequencyBandImageFilter()
   : m_LowFrequencyThreshold(0)
   , m_HighFrequencyThreshold(0.5)
-
 {
   this->InPlaceOff();
   this->DynamicMultiThreadingOn();

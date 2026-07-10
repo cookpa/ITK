@@ -31,7 +31,6 @@ RieszRotationMatrix<VImageDimension>::RieszRotationMatrix()
   ,
 
   m_MaxAbsoluteDifferenceCloseToZero(1 * itk::NumericTraits<RealType>::epsilon())
-
 {}
 
 template <unsigned int VImageDimension>
@@ -41,7 +40,6 @@ RieszRotationMatrix<VImageDimension>::RieszRotationMatrix(const Self & rieszMatr
   , m_Order(rieszMatrix.GetOrder())
   , m_Components(rieszMatrix.GetComponents())
   , m_MaxAbsoluteDifferenceCloseToZero(1 * itk::NumericTraits<RealType>::epsilon())
-
 {}
 
 template <unsigned int VImageDimension>
@@ -50,7 +48,6 @@ RieszRotationMatrix<VImageDimension>::RieszRotationMatrix(const SpatialRotationM
   : Superclass()
   , m_SpatialRotationMatrix(spatialRotationMatrix)
   , m_MaxAbsoluteDifferenceCloseToZero(1 * itk::NumericTraits<RealType>::epsilon())
-
 {
   this->SetOrder(order);
   this->ComputeSteerableMatrix();

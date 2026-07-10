@@ -30,7 +30,6 @@ ManifoldParzenWindowsPointSetFunction<TPointSet, TOutput, TCoordinate>::Manifold
   : m_PointsLocator(nullptr)
   , m_RegularizationSigma(1.0)
   , m_KernelSigma(1.0)
-
 {
   m_MultiThreader = MultiThreaderBase::New();
 }

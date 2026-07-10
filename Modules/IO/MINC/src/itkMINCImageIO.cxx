@@ -234,7 +234,6 @@ MINCImageIO::CloseVolume()
 
 MINCImageIO::MINCImageIO()
   : m_MINCPImpl(std::make_unique<MINCImageIOPImpl>())
-
 {
   for (auto & dimensionIndex : m_MINCPImpl->m_DimensionIndices)
   {

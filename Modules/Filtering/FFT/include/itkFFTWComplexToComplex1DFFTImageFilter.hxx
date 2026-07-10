@@ -37,7 +37,6 @@ namespace itk
 
 template <typename TInputImage, typename TOutputImage>
 FFTWComplexToComplex1DFFTImageFilter<TInputImage, TOutputImage>::FFTWComplexToComplex1DFFTImageFilter()
-
 {
   // We cannot split over the FFT direction
   this->m_ImageRegionSplitter = ImageRegionSplitterDirection::New();

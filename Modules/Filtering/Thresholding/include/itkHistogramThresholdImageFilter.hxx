@@ -33,7 +33,6 @@ HistogramThresholdImageFilter<TInputImage, TOutputImage, TMaskImage>::HistogramT
   , m_OutsideValue(OutputPixelType{})
   , m_Threshold(InputPixelType{})
   , m_MaskValue(NumericTraits<MaskPixelType>::max())
-
 {
   this->SetNumberOfRequiredOutputs(1);
 

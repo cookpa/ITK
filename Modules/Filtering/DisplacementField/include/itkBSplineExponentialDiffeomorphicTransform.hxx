@@ -30,7 +30,6 @@ namespace itk
 
 template <typename TParametersValueType, unsigned int VDimension>
 BSplineExponentialDiffeomorphicTransform<TParametersValueType, VDimension>::BSplineExponentialDiffeomorphicTransform()
-
 {
   this->m_NumberOfControlPointsForTheConstantVelocityField.Fill(4);
   this->m_NumberOfControlPointsForTheUpdateField.Fill(4);

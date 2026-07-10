@@ -27,7 +27,6 @@ namespace itk
 {
 template <typename TInputImage, typename TOutputImage>
 GrayscaleConnectedClosingImageFilter<TInputImage, TOutputImage>::GrayscaleConnectedClosingImageFilter()
-
 {
   m_Seed.Fill(typename InputImageIndexType::OffsetValueType{});
 }

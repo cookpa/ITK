@@ -35,7 +35,6 @@ LevelSetNeighborhoodExtractor<TLevelSet>::LevelSetNeighborhoodExtractor()
   , m_InputLevelSet(nullptr)
   , m_InputNarrowBand(nullptr)
   , m_LargeValue(NumericTraits<PixelType>::max())
-
 {
   m_NodesUsed.resize(SetDimension);
 }

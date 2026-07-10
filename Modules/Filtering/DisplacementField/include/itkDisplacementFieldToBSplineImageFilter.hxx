@@ -34,7 +34,6 @@ template <typename TInputImage, typename TInputPointSet, typename TOutputImage>
 DisplacementFieldToBSplineImageFilter<TInputImage, TInputPointSet, TOutputImage>::
   DisplacementFieldToBSplineImageFilter()
   : m_PointWeights(nullptr)
-
 {
   // Input 0 DisplacementField optional
   Self::SetPrimaryInputName("DisplacementField");

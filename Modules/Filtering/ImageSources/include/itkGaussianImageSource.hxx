@@ -28,7 +28,6 @@ namespace itk
 
 template <typename TOutputImage>
 GaussianImageSource<TOutputImage>::GaussianImageSource()
-
 {
   // Gaussian parameters, defined so that the Gaussian
   // is centered in the default image

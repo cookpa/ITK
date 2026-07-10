@@ -28,7 +28,6 @@ namespace itk
 {
 template <typename TOutputImage>
 GridImageSource<TOutputImage>::GridImageSource()
-
 {
   this->m_Sigma.Fill(0.5);
   this->m_GridSpacing.Fill(4.0);

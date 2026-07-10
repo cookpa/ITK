@@ -392,7 +392,6 @@ ConvertPixelBuffer<InputPixelType, OutputPixelType, OutputConvertTraits>::Conver
   const InputPixelType * inputData,
   OutputPixelType *      outputData,
   size_t                 size)
-
 {
   const InputPixelType * endInput = inputData + size;
 

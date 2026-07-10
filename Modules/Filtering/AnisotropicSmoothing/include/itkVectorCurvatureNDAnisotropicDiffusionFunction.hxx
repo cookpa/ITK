@@ -26,7 +26,6 @@ double VectorCurvatureNDAnisotropicDiffusionFunction<TImage>::m_MIN_NORM = 1.0e-
 
 template <typename TImage>
 VectorCurvatureNDAnisotropicDiffusionFunction<TImage>::VectorCurvatureNDAnisotropicDiffusionFunction()
-
 {
   RadiusType r;
   for (unsigned int i = 0; i < ImageDimension; ++i)

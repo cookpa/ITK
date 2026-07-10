@@ -36,7 +36,6 @@ ThresholdMaximumConnectedComponentsImageFilter<TInputImage,
   , m_MinMaxCalculator(MinMaxCalculatorType::New())
   , m_OutsideValue(OutputPixelType{})
   , m_InsideValue(NumericTraits<OutputPixelType>::max())
-
 {
   //
   // Connecting the internal pipeline.

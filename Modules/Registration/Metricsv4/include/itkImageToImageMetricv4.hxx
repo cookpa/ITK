@@ -51,7 +51,6 @@ ImageToImageMetricv4<TFixedImage, TMovingImage, TVirtualImage, TInternalComputat
   /* Interpolators for image gradient filters */
   , m_DerivativeResult(nullptr)
   , m_FloatingPointCorrectionResolution(1e6)
-
 {
   /* Setup default gradient filter. It gets initialized with default
    * parameters during Initialize. */

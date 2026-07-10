@@ -169,7 +169,6 @@ CalculateOrientedImage(const itk::SymmetricEigenDecomposition<double> &         
 
 template <typename TLabelImage, typename TIntensityImage>
 LabelGeometryImageFilter<TLabelImage, TIntensityImage>::LabelGeometryImageFilter()
-
 {
   this->SetNumberOfRequiredInputs(1);
 }

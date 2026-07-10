@@ -48,7 +48,6 @@ N4BiasFieldCorrectionImageFilter<TInputImage, TMaskImage, TOutputImage>::N4BiasF
   : m_MaskLabel(NumericTraits<MaskPixelType>::OneValue())
   , m_CurrentConvergenceMeasurement(RealType{})
   , m_LogBiasFieldControlPointLattice(nullptr)
-
 {
   // implicit:
   // #0 "Primary" required

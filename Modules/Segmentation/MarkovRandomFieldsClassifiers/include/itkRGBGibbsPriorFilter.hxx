@@ -38,7 +38,6 @@ RGBGibbsPriorFilter<TInputImage, TClassifiedImage>::RGBGibbsPriorFilter()
   , m_ClassifierPtr(nullptr)
   , m_MediumImage(nullptr)
   , m_LowPoint()
-
 {
   m_StartPoint.Fill(0);
   this->SetMaximumNumberOfIterations(10);

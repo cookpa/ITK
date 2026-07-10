@@ -28,7 +28,6 @@ class AnchorOpenImageFilter
                                       TKernel,
                                       std::less<typename TImage::PixelType>,
                                       std::greater<typename TImage::PixelType>>
-
 {
 public:
   ITK_DISALLOW_COPY_AND_MOVE(AnchorOpenImageFilter);

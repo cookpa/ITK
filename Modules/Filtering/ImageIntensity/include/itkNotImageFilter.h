@@ -57,7 +57,6 @@ class NotImageFilter
   : public UnaryFunctorImageFilter<TInputImage,
                                    TOutputImage,
                                    Functor::NOT<typename TInputImage::PixelType, typename TOutputImage::PixelType>>
-
 {
 public:
   ITK_DISALLOW_COPY_AND_MOVE(NotImageFilter);

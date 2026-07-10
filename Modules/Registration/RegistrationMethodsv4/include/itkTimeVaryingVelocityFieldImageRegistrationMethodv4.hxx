@@ -45,7 +45,6 @@ TimeVaryingVelocityFieldImageRegistrationMethodv4<TFixedImage,
                                                   TPointSet>::TimeVaryingVelocityFieldImageRegistrationMethodv4()
   : m_LearningRate(0.25)
   , m_ConvergenceThreshold(1.0e-7)
-
 {
   this->m_NumberOfIterationsPerLevel.SetSize(3);
   this->m_NumberOfIterationsPerLevel[0] = 20;

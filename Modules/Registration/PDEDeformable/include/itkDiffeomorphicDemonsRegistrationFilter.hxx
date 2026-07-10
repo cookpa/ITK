@@ -30,7 +30,6 @@ DiffeomorphicDemonsRegistrationFilter<TFixedImage, TMovingImage, TDisplacementFi
   , m_Exponentiator(FieldExponentiatorType::New())
   , m_Warper(VectorWarperType::New())
   , m_Adder(AdderType::New())
-
 {
   auto drfp = DemonsRegistrationFunctionType::New();
   this->SetDifferenceFunction(drfp);

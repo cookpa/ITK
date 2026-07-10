@@ -330,7 +330,6 @@ ReadJCAMPDX(const std::string & filename, MetaDataDictionary & dict)
 } // namespace
 
 Bruker2dseqImageIO::Bruker2dseqImageIO()
-
 {
   // By default, only have 3 dimensions
   this->SetNumberOfDimensions(3);

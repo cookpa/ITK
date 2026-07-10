@@ -26,7 +26,6 @@ namespace itk
 {
 template <typename TImageType, typename TFrequencyIterator>
 UnaryFrequencyDomainFilter<TImageType, TFrequencyIterator>::UnaryFrequencyDomainFilter()
-
 {
   this->InPlaceOff();
   this->DynamicMultiThreadingOn();

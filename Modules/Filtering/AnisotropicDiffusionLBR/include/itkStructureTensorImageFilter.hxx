@@ -33,7 +33,6 @@ template <typename TImage, typename TTensorImage>
 StructureTensorImageFilter<TImage, TTensorImage>::StructureTensorImageFilter()
   : m_FeatureScale(2)
   , m_NoiseScale(1)
-
 {}
 
 

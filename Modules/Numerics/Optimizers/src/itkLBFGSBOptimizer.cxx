@@ -53,7 +53,6 @@ private:
  * Constructor
  */
 LBFGSBOptimizer::LBFGSBOptimizer()
-
 {
   m_LowerBound = InternalBoundValueType(0);
   m_UpperBound = InternalBoundValueType(0);

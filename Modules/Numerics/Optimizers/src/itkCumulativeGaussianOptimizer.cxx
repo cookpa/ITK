@@ -23,7 +23,6 @@ namespace itk
 {
 CumulativeGaussianOptimizer::CumulativeGaussianOptimizer()
   : m_DifferenceTolerance(1e-10)
-
 {
   // Set some initial values for the variables.
   m_StopConditionDescription << this->GetNameOfClass() << ": Constructed";

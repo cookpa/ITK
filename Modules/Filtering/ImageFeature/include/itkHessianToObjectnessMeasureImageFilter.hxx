@@ -32,7 +32,6 @@ namespace itk
 
 template <typename TInputImage, typename TOutputImage>
 HessianToObjectnessMeasureImageFilter<TInputImage, TOutputImage>::HessianToObjectnessMeasureImageFilter()
-
 {
   this->DynamicMultiThreadingOn();
   this->ThreaderUpdateProgressOff();

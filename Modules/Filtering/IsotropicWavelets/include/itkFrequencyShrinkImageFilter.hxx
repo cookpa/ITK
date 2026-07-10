@@ -32,7 +32,6 @@ namespace itk
 {
 template <class TImageType>
 FrequencyShrinkImageFilter<TImageType>::FrequencyShrinkImageFilter()
-
 {
   for (unsigned int j = 0; j < ImageDimension; j++)
   {

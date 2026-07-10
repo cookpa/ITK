@@ -40,7 +40,6 @@ namespace itk
 
 template <typename TInputImage, typename TOutputImage, typename TFunction>
 class ITK_TEMPLATE_EXPORT NaryFunctorImageFilter : public InPlaceImageFilter<TInputImage, TOutputImage>
-
 {
 public:
   ITK_DISALLOW_COPY_AND_MOVE(NaryFunctorImageFilter);

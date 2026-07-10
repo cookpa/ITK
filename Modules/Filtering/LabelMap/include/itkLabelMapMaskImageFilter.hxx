@@ -32,7 +32,6 @@ template <typename TInputImage, typename TOutputImage>
 LabelMapMaskImageFilter<TInputImage, TOutputImage>::LabelMapMaskImageFilter()
   : m_Label(NumericTraits<InputImagePixelType>::OneValue())
   , m_BackgroundValue(OutputImagePixelType{})
-
 {
   this->SetNumberOfRequiredInputs(2);
   m_CropBorder.Fill(0);

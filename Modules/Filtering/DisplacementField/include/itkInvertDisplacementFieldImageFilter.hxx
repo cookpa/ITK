@@ -42,7 +42,6 @@ InvertDisplacementFieldImageFilter<TInputImage, TOutputImage>::InvertDisplacemen
   , m_MaxErrorNorm(0.0)
   , m_MeanErrorNorm(0.0)
   , m_Epsilon(0.0)
-
 {
   this->Self::SetPrimaryInputName("DisplacementField");
   this->Self::AddOptionalInputName("InverseFieldInitialEstimate");

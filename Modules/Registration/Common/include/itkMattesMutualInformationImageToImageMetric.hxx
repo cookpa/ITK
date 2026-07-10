@@ -37,7 +37,6 @@ MattesMutualInformationImageToImageMetric<TFixedImage, TMovingImage>::MattesMutu
   // Initialize memory
   m_MovingImageMarginalPDF(0)
   , m_MMIMetricPerThreadVariables(nullptr)
-
 {
   this->SetComputeGradient(false); // don't use the default gradient for now
   this->m_WithinThreadPreProcess = true;

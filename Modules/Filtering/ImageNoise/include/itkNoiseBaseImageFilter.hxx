@@ -26,7 +26,6 @@ namespace itk
 
 template <class TInputImage, class TOutputImage>
 NoiseBaseImageFilter<TInputImage, TOutputImage>::NoiseBaseImageFilter()
-
 {
   Self::SetSeed();
 

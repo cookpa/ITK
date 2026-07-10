@@ -33,8 +33,6 @@ namespace itk
 
 template <typename TInputImage, typename TLabelImage>
 MorphologicalWatershedFromMarkersImageFilter<TInputImage, TLabelImage>::MorphologicalWatershedFromMarkersImageFilter()
-
-
 {
   this->SetNumberOfRequiredInputs(2);
 }

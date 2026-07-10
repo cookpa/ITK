@@ -24,7 +24,6 @@
 namespace itk
 {
 FreeSurferBinaryMeshIO::FreeSurferBinaryMeshIO()
-
 {
   this->AddSupportedWriteExtension(".fsb");
   this->AddSupportedWriteExtension(".fcv");

@@ -32,7 +32,6 @@ GradientDescentOptimizerBasev4Template<TInternalComputationValueType>::GradientD
   , m_UseConvergenceMonitoring(true)
   , m_ConvergenceWindowSize(50)
   , m_StopCondition(StopConditionObjectToObjectOptimizerEnum::MAXIMUM_NUMBER_OF_ITERATIONS)
-
 {
   /** Threader for apply scales to gradient */
   const typename GradientDescentOptimizerBasev4ModifyGradientByScalesThreaderTemplate<

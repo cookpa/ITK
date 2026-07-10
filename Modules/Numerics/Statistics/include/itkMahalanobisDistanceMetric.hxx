@@ -22,7 +22,6 @@ namespace itk::Statistics
 {
 template <typename TVector>
 MahalanobisDistanceMetric<TVector>::MahalanobisDistanceMetric()
-
 {
   const MeasurementVectorSizeType size = this->GetMeasurementVectorSize();
 

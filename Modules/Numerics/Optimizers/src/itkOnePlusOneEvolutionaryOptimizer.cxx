@@ -30,7 +30,6 @@ OnePlusOneEvolutionaryOptimizer::OnePlusOneEvolutionaryOptimizer()
   , m_InitialRadius(1.01)
   , m_GrowthFactor(1.05)
   , m_ShrinkFactor(std::pow(m_GrowthFactor, -0.25))
-
 {
   m_StopConditionDescription.str("");
 }

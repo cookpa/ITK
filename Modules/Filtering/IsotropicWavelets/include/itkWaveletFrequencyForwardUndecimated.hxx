@@ -28,8 +28,6 @@ namespace itk
 {
 template <typename TInputImage, typename TOutputImage, typename TWaveletFilterBank>
 WaveletFrequencyForwardUndecimated<TInputImage, TOutputImage, TWaveletFilterBank>::WaveletFrequencyForwardUndecimated()
-
-
 {
   this->SetNumberOfRequiredInputs(1);
   m_WaveletFilterBank = WaveletFilterBankType::New();

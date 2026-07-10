@@ -49,7 +49,6 @@ namespace itk
 template <typename TInputImage,
           typename TOutputImage = Image<typename TInputImage::PixelType::value_type, TInputImage::ImageDimension>>
 class ITK_TEMPLATE_EXPORT InverseFFTImageFilter : public ImageToImageFilter<TInputImage, TOutputImage>
-
 {
 public:
   ITK_DISALLOW_COPY_AND_MOVE(InverseFFTImageFilter);

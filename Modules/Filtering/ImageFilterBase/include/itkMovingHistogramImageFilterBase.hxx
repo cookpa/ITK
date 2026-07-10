@@ -29,7 +29,6 @@ namespace itk
 {
 template <typename TInputImage, typename TOutputImage, typename TKernel>
 MovingHistogramImageFilterBase<TInputImage, TOutputImage, TKernel>::MovingHistogramImageFilterBase()
-
 {
   // call again SetKernel in that class, to have the offsets computed for
   // the default kernel. An AnalyzeKernel() method as in the binary

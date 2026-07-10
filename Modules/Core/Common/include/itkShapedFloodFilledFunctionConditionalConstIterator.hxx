@@ -28,7 +28,6 @@ ShapedFloodFilledFunctionConditionalConstIterator<TImage, TFunction>::ShapedFloo
   FunctionType *    fnPtr,
   IndexType         startIndex)
   : m_Function(fnPtr)
-
 {
   this->m_Image = imagePtr;
   m_Seeds.push_back(startIndex);
@@ -43,7 +42,6 @@ ShapedFloodFilledFunctionConditionalConstIterator<TImage, TFunction>::ShapedFloo
   FunctionType *           fnPtr,
   std::vector<IndexType> & startIndex)
   : m_Function(fnPtr)
-
 {
   this->m_Image = imagePtr; // can not be done in the initialization list
   for (unsigned int i = 0; i < startIndex.size(); ++i)
@@ -60,7 +58,6 @@ ShapedFloodFilledFunctionConditionalConstIterator<TImage, TFunction>::ShapedFloo
   const ImageType * imagePtr,
   FunctionType *    fnPtr)
   : m_Function(fnPtr)
-
 {
   this->m_Image = imagePtr;
   // Set up the temporary image

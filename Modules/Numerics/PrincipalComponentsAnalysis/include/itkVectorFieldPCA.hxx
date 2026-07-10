@@ -39,7 +39,6 @@ VectorFieldPCA<TVectorFieldElementType,
                KernelFunctionType,
                TPointSetType>::VectorFieldPCA()
   : m_BasisVectors(BasisSetType::New())
-
 {}
 
 template <typename TVectorFieldElementType,

@@ -30,7 +30,6 @@ namespace itk
 template <typename TParametersValueType, unsigned int VDimension>
 BSplineSmoothingOnUpdateDisplacementFieldTransform<TParametersValueType,
                                                    VDimension>::BSplineSmoothingOnUpdateDisplacementFieldTransform()
-
 {
   this->m_NumberOfControlPointsForTheUpdateField.Fill(4);
   this->m_NumberOfControlPointsForTheTotalField.Fill(0);

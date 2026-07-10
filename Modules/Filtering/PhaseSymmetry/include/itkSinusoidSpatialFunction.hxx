@@ -25,7 +25,6 @@ namespace itk
 {
 template <typename TOutput, unsigned int VImageDimension, typename TInput>
 SinusoidSpatialFunction<TOutput, VImageDimension, TInput>::SinusoidSpatialFunction()
-
 {
   m_Frequency.Fill(1.0);
 }

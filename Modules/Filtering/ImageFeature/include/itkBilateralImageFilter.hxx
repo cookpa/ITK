@@ -37,7 +37,6 @@ BilateralImageFilter<TInputImage, TOutputImage>::BilateralImageFilter()
   , m_FilterDimensionality(ImageDimension)
   , m_AutomaticKernelSize(true)
   , m_NumberOfRangeGaussianSamples(100)
-
 {
   this->m_Radius.Fill(1);
   this->m_DomainSigma.Fill(4.0);

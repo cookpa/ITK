@@ -44,7 +44,6 @@ MultiScaleHessianBasedMeasureImageFilter<TInputImage, THessianImage, TOutputImag
   , m_HessianToMeasureFilter(nullptr)
   , m_HessianFilter(HessianFilterType::New())
   , m_UpdateBuffer(UpdateBufferType::New())
-
 {
   auto scalesImage = ScalesImageType::New();
   auto hessianImage = HessianImageType::New();

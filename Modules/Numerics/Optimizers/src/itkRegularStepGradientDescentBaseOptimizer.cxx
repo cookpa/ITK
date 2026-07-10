@@ -32,8 +32,6 @@ RegularStepGradientDescentBaseOptimizer::RegularStepGradientDescentBaseOptimizer
   , m_RelaxationFactor(0.5)
   , m_StopCondition(StopConditionEnum::Unknown)
   , m_NumberOfIterations(100)
-
-
 {
   m_CostFunction = nullptr;
   m_Gradient.Fill(0.0f);

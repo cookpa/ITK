@@ -27,7 +27,6 @@ namespace itk
 
 template <typename TInputImage, typename TOutputImage>
 HessianRecursiveGaussianImageFilter<TInputImage, TOutputImage>::HessianRecursiveGaussianImageFilter()
-
 {
   std::generate(m_SmoothingFilters.begin(), m_SmoothingFilters.end(), [this] {
     const auto filter = GaussianFilterType::New();
