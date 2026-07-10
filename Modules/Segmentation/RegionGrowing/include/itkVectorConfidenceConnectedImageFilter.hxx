@@ -284,6 +284,11 @@ VectorConfidenceConnectedImageFilter<TInputImage, TOutputImage>::GenerateData()
       ++num;
       ++sit;
     }
+    if (num == 0)
+    {
+      // No samples to re-estimate from; NaN statistics would corrupt the next pass.
+      break;
+    }
     for (unsigned int ii = 0; ii < dimension; ++ii)
     {
       mean[ii] /= static_cast<double>(num);

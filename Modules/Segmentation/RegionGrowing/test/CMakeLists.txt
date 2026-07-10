@@ -168,3 +168,6 @@ itk_add_test(
   ITK_REMOVE_TEMPORARY_TEST_FILES
     ${ITK_TEST_OUTPUT_DIR}/ConnectedThresholdImageFilterTest2.png
 )
+
+set(ITKRegionGrowingGTests itkVectorConfidenceConnectedImageFilterGTest.cxx)
+creategoogletestdriver(ITKRegionGrowing "${ITKRegionGrowing-Test_LIBRARIES}" "${ITKRegionGrowingGTests}")

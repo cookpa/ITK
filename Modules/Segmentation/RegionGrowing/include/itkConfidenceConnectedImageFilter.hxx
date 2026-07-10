@@ -300,6 +300,11 @@ ConfidenceConnectedImageFilter<TInputImage, TOutputImage>::GenerateData()
       ++numberOfSamples;
       ++sit;
     }
+    if (numberOfSamples == 0)
+    {
+      // No samples to re-estimate from; NaN statistics would corrupt the next pass.
+      break;
+    }
     m_Mean = sum / static_cast<double>(numberOfSamples);
     m_Variance = (sumOfSquares - (sum * sum / static_cast<double>(numberOfSamples))) /
                  (static_cast<double>(numberOfSamples) - 1.0);
