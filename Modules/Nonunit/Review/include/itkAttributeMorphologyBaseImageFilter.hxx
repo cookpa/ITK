@@ -120,7 +120,7 @@ AttributeMorphologyBaseImageFilter<TInputImage, TOutputImage, TAttribute, TFunct
   }
   progress.CompletedPixel();
   m_CompareOffset.buf = m_Raw.get();
-  std::stable_sort(&(m_SortPixels[0]), &(m_SortPixels[buffsize - 1]), m_CompareOffset);
+  std::stable_sort(m_SortPixels.get(), m_SortPixels.get() + buffsize, m_CompareOffset);
   progress.CompletedPixel();
 
   // set up the offset vector
