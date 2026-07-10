@@ -664,5 +664,9 @@ itk_add_test(
     0.0
 )
 
-set(ITKReviewGTests itkAreaOpeningImageFilterGTest.cxx)
+set(
+  ITKReviewGTests
+  itkAreaOpeningImageFilterGTest.cxx
+  itkFastApproximateRankImageFilterGTest.cxx
+)
 creategoogletestdriver(ITKReview "${ITKReview-Test_LIBRARIES}" "${ITKReviewGTests}")
