@@ -1,0 +1,80 @@
+/*=========================================================================
+ *
+ *  Copyright NumFOCUS
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *         https://www.apache.org/licenses/LICENSE-2.0.txt
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *=========================================================================*/
+
+#include "itkMultiLabelSTAPLEImageFilter.h"
+#include "itkImageRegionIterator.h"
+#include "itkGTest.h"
+
+#include <array>
+
+namespace
+{
+using ImageType = itk::Image<unsigned char, 2>;
+using FilterType = itk::MultiLabelSTAPLEImageFilter<ImageType>;
+
+ImageType::Pointer
+MakeRaterImage(const std::array<unsigned char, 4> & labels)
+{
+  auto image = ImageType::New();
+  image->SetRegions(ImageType::RegionType{ ImageType::SizeType{ 4, 1 } });
+  image->Allocate();
+  itk::ImageRegionIterator<ImageType> it(image, image->GetBufferedRegion());
+  for (const unsigned char label : labels)
+  {
+    it.Set(label);
+    ++it;
+  }
+  return image;
+}
+} // namespace
+
+// Voting-tie pixels carry the undecided label (one past the confusion matrix's last column)
+// and must be skipped when seeding, not written past the row (issue #6575, B10).
+TEST(MultiLabelSTAPLEImageFilter, VotingUndecidedPixelsDoNotCorruptSeededConfusionMatrix)
+{
+  auto filter = FilterType::New();
+  filter->SetInput(0, MakeRaterImage({ 0, 1, 0, 1 }));
+  filter->SetInput(1, MakeRaterImage({ 0, 1, 1, 0 }));
+  // Zero EM iterations: the confusion matrices stay exactly as seeded by voting.
+  filter->SetMaximumNumberOfIterations(0);
+  filter->Update();
+  EXPECT_EQ(filter->GetElapsedNumberOfIterations(), 0u);
+
+  for (unsigned int rater = 0; rater < 2; ++rater)
+  {
+    const FilterType::ConfusionMatrixType & cm = filter->GetConfusionMatrix(rater);
+    ASSERT_EQ(cm.rows(), 3u);
+    ASSERT_EQ(cm.cols(), 2u);
+    const double expected[3][2] = { { 1.0, 0.0 }, { 0.0, 1.0 }, { 0.0, 0.0 } };
+    for (unsigned int r = 0; r < 3; ++r)
+    {
+      for (unsigned int c = 0; c < 2; ++c)
+      {
+        EXPECT_NEAR(cm(r, c), expected[r][c], 1e-6) << "rater " << rater << " (" << r << ',' << c << ')';
+      }
+    }
+  }
+
+  const unsigned char                 expectedOutput[4] = { 0, 1, 2, 2 };
+  itk::ImageRegionIterator<ImageType> out(filter->GetOutput(), filter->GetOutput()->GetBufferedRegion());
+  for (const unsigned char expectedLabel : expectedOutput)
+  {
+    EXPECT_EQ(out.Get(), expectedLabel);
+    ++out;
+  }
+}

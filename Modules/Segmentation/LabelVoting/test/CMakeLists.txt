@@ -80,3 +80,6 @@ itk_add_test(
     ITKLabelVotingTestDriver
     itkMultiLabelSTAPLEImageFilterTest
 )
+
+set(ITKLabelVotingGTests itkMultiLabelSTAPLEImageFilterGTest.cxx)
+creategoogletestdriver(ITKLabelVoting "${ITKLabelVoting-Test_LIBRARIES}" "${ITKLabelVotingGTests}")

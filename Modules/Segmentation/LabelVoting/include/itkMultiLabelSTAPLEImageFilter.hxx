@@ -143,7 +143,11 @@ MultiLabelSTAPLEImageFilter<TInputImage, TOutputImage, TWeights>::InitializeConf
 
     for (out.GoToBegin(); !out.IsAtEnd(); ++out, ++in)
     {
-      ++(this->m_ConfusionMatrixArray[k][in.Get()][out.Get()]);
+      // Voting-undecided pixels carry the label m_TotalLabelCount, one past the last matrix column.
+      if (static_cast<size_t>(out.Get()) < this->m_TotalLabelCount)
+      {
+        ++(this->m_ConfusionMatrixArray[k][in.Get()][out.Get()]);
+      }
     }
   }
 
