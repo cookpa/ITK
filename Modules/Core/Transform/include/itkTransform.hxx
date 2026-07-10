@@ -466,6 +466,11 @@ Transform<TParametersValueType, VInputDimension, VOutputDimension>::ApplyToImage
   }
 
   const typename Self::Pointer inverse = this->GetInverseTransform();
+  if (inverse.IsNull())
+  {
+    itkExceptionMacro(
+      "ApplyToImageMetadata was invoked with non-invertible transform of type: " << this->GetNameOfClass());
+  }
 
   // transform origin
   typename ImageType::PointType origin = image->GetOrigin();
