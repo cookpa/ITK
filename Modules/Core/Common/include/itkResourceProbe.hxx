@@ -34,11 +34,11 @@
 #include <algorithm>
 #include <functional>
 #include <utility>
+#include <type_traits>
 
 #include "itkNumericTraits.h"
 #include "itksys/SystemInformation.hxx"
 #include "itkMath.h"
-#include "itkIsNumber.h"
 #include "itkPrintHelper.h"
 
 namespace itk
@@ -390,20 +390,39 @@ ResourceProbe<ValueType, MeanType>::PrintJSONvar(std::ostream & os,
                                                  unsigned int   indent,
                                                  bool           comma)
 {
-  const bool varIsNumber = mpl::IsNumber<T>::Value;
-  while (indent > 0)
+  os << std::string(indent, ' ') << '"' << varName << "\": ";
+
+  if constexpr (std::is_same_v<std::remove_cv_t<T>, bool>)
   {
-    os << ' ';
-    --indent;
+    os << (varValue ? "true" : "false");
   }
-  if (varIsNumber) // no quotes around the value
+  else if constexpr (std::is_arithmetic_v<T>) // integer or floating point
   {
-    os << '"' << varName << "\": " << varValue;
+    if constexpr (std::is_floating_point_v<T>)
+    {
+      if (!std::isfinite(varValue)) // JSON has no NaN/Infinity
+      {
+        os << "null";
+      }
+      else
+      {
+        os << varValue;
+      }
+    }
+    else if constexpr (sizeof(T) == 1) // char/int8 family: emit the code, not the glyph
+    {
+      os << static_cast<int>(varValue);
+    }
+    else
+    {
+      os << varValue;
+    }
   }
-  else // put quotes around the value
+  else // string-like: quote it
   {
-    os << '"' << varName << "\": \"" << varValue << '"';
+    os << '"' << varValue << '"';
   }
+
   if (comma)
   {
     os << ',';

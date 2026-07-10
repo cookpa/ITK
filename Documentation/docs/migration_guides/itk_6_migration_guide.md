@@ -206,6 +206,9 @@ enabled. Similarly, `InputCoordinateType`, `OutputCoordinateType`, and
 `ImagePointCoordinateType` replace `InputCoordRepType`, `OutputCoordRepType`,
 and `ImagePointCoordRepType`, respectively.
 
+itkIsNumber.h got deprecated. To modernize your code base, replace `mpl::IsNumber<X>::Value`
+with `std::is_arithmetic_v<X>`, and `#include "itkIsNumber.h"` with `#include <type_traits>`.
+
 
 ITKFEM and ITKFEMRegistration modules removed
 ---------------------------------------------

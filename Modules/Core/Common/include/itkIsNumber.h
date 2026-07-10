@@ -19,8 +19,12 @@
 #ifndef itkIsNumber_h
 #define itkIsNumber_h
 
-#include "itkMetaProgrammingLibrary.h"
-#include "itkIntTypes.h"
+#include "itkMacro.h"
+
+#if !defined(ITK_LEGACY_REMOVE)
+
+#  include "itkMetaProgrammingLibrary.h"
+#  include "itkIntTypes.h"
 
 
 /// \cond HIDE_META_PROGRAMMING
@@ -80,5 +84,9 @@ struct IsNumber<long double> : TrueType
 
 } // namespace itk::mpl
 /// \endcond
+
+#else // ITK_LEGACY_REMOVE
+#  error Use std::is_arithmetic from <type_traits> directly
+#endif
 
 #endif // itkIsNumber_h
