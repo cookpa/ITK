@@ -118,6 +118,7 @@ InverseDisplacementFieldImageFilter<TInputImage, TOutputImage>::PrepareKernelBas
 
   resampler->SetInput(inputImage);
   resampler->SetOutputOrigin(inputImage->GetOrigin());
+  resampler->SetOutputDirection(inputImage->GetDirection());
 
   typename InputImageType::SpacingType spacing = inputImage->GetSpacing();
 
