@@ -30,7 +30,6 @@ namespace itk
 
 template <typename TInternalVnlOptimizerType>
 LBFGSOptimizerBasev4<TInternalVnlOptimizerType>::LBFGSOptimizerBasev4()
-
 {
   Superclass::SetNumberOfIterations(500);
 }

@@ -31,8 +31,6 @@ namespace itk
 template <typename TInputImage, typename TOutputImage, typename TWaveletFilterBank, typename TFrequencyExpandFilterType>
 WaveletFrequencyInverse<TInputImage, TOutputImage, TWaveletFilterBank, TFrequencyExpandFilterType>::
   WaveletFrequencyInverse()
-
-
 {
   this->SetNumberOfRequiredOutputs(1);
   this->m_WaveletFilterBank = WaveletFilterBankType::New();

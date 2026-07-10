@@ -37,7 +37,6 @@ namespace itk
 
 template <typename TInputImage, typename TOutputImage>
 BSplineDecompositionImageFilter<TInputImage, TOutputImage>::BSplineDecompositionImageFilter()
-
 {
   this->SetSplineOrder(3);
 }

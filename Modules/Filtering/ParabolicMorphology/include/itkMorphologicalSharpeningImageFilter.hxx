@@ -21,7 +21,6 @@
 #include "itkProgressAccumulator.h"
 
 namespace itk
-
 {
 template <typename TInputImage, typename TOutputImage>
 MorphologicalSharpeningImageFilter<TInputImage, TOutputImage>::MorphologicalSharpeningImageFilter()

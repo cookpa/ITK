@@ -30,7 +30,6 @@ namespace itk
 template <typename TInputImage, typename TOutputImage>
 LabelVotingImageFilter<TInputImage, TOutputImage>::LabelVotingImageFilter()
   : m_LabelForUndecidedPixels(0)
-
 {
   this->ThreaderUpdateProgressOff();
 }

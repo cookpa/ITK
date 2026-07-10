@@ -30,7 +30,6 @@ namespace itk
 {
 
 HDF5ImageIO::HDF5ImageIO()
-
 {
 
   const char * extensions[] = { ".hdf", ".h4", ".hdf4", ".h5", ".hdf5", ".he4", ".he5", ".hd5" };

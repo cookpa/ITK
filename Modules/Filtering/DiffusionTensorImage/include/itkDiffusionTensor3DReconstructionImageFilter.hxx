@@ -41,7 +41,6 @@ DiffusionTensor3DReconstructionImageFilter<TReferenceImagePixelType,
   , m_Threshold(NumericTraits<ReferencePixelType>::min())
   , m_BValue(1.0)
   , m_GradientImageTypeEnumeration(DiffusionTensor3DReconstructionImageFilterEnums::GradientImageFormat::Else)
-
 {
   // At least 1 inputs is necessary for a vector image.
   // For images added one at a time we need at least six

@@ -27,7 +27,6 @@ PowellOptimizer::PowellOptimizer()
   , m_StepLength(1.0)
   , m_StepTolerance(0.00001)
   , m_ValueTolerance(0.00001)
-
 {
   m_StopConditionDescription << this->GetNameOfClass() << ": ";
 }

@@ -23,7 +23,6 @@ namespace itk::Statistics
 
 template <typename TSample, typename TRegion>
 RegionConstrainedSubsampler<TSample, TRegion>::RegionConstrainedSubsampler()
-
 {
   this->m_RequestMaximumNumberOfResults = true;
 }

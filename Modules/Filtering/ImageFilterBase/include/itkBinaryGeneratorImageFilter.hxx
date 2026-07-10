@@ -165,7 +165,6 @@ template <typename TInputImage1, typename TInputImage2, typename TOutputImage>
 void
 BinaryGeneratorImageFilter<TInputImage1, TInputImage2, TOutputImage>::DynamicThreadedGenerateData(
   const OutputImageRegionType & outputRegionForThread)
-
 {
   m_DynamicThreadedGenerateDataFunction(outputRegionForThread);
 }

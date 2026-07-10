@@ -36,7 +36,6 @@ AnisotropicDiffusionLBRImageFilter<TImage, TScalar>::AnisotropicDiffusionLBRImag
   ,
 
   m_DiffusionTime(1)
-
 {}
 
 

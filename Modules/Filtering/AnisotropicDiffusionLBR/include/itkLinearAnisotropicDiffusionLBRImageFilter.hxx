@@ -42,7 +42,6 @@ LinearAnisotropicDiffusionLBRImageFilter<TImage, TScalar>::LinearAnisotropicDiff
   ,
 
   m_EffectiveDiffusionTime(0)
-
 {
   this->SetNumberOfRequiredInputs(2);
 }

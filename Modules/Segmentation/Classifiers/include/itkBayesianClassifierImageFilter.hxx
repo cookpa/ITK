@@ -40,7 +40,6 @@ template <typename TInputVectorImage,
 BayesianClassifierImageFilter<TInputVectorImage, TLabelsType, TPosteriorsPrecisionType, TPriorsPrecisionType>::
   BayesianClassifierImageFilter()
   : m_SmoothingFilter(nullptr)
-
 {
   this->SetNumberOfRequiredOutputs(2);
   const PosteriorsImagePointer p = static_cast<PosteriorsImageType *>(this->MakeOutput(1).GetPointer());

@@ -24,7 +24,6 @@ namespace itk
 {
 template <typename TInputImage, typename TOutputImage>
 RegionGrowImageFilter<TInputImage, TOutputImage>::RegionGrowImageFilter()
-
 {
   m_GridSize.Fill(2);
 }

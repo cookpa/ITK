@@ -30,7 +30,6 @@ namespace itk
 
 template <typename TInputImage, typename TOutputImage, typename TVoronoiImage>
 DanielssonDistanceMapImageFilter<TInputImage, TOutputImage, TVoronoiImage>::DanielssonDistanceMapImageFilter()
-
 {
   // Make the outputs (distance map, voronoi map, distance vectors).
   ProcessObject::MakeRequiredOutputs(*this, 3);

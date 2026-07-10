@@ -37,7 +37,6 @@ IsolatedConnectedImageFilter<TInputImage, TOutputImage>::IsolatedConnectedImageF
   , m_IsolatedValue(InputImagePixelType{})
   , m_IsolatedValueTolerance(NumericTraits<InputImagePixelType>::OneValue())
   , m_FindUpperThreshold(true)
-
 {}
 
 template <typename TInputImage, typename TOutputImage>

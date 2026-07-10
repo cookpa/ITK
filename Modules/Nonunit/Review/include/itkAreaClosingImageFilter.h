@@ -50,7 +50,6 @@ class AreaClosingImageFilter
                                               TOutputImage,
                                               TAttribute,
                                               std::less<typename TInputImage::PixelType>>
-
 {
 public:
   ITK_DISALLOW_COPY_AND_MOVE(AreaClosingImageFilter);

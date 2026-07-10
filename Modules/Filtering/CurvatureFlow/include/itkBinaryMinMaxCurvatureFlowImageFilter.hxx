@@ -25,7 +25,6 @@ namespace itk
 
 template <typename TInputImage, typename TOutputImage>
 BinaryMinMaxCurvatureFlowImageFilter<TInputImage, TOutputImage>::BinaryMinMaxCurvatureFlowImageFilter()
-
 {
   auto cffp = BinaryMinMaxCurvatureFlowFunctionType::New();
 

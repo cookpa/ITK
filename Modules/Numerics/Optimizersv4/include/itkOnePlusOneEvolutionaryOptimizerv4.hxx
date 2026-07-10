@@ -31,7 +31,6 @@ OnePlusOneEvolutionaryOptimizerv4<TInternalComputationValueType>::OnePlusOneEvol
   , m_GrowthFactor(1.05)
   , m_ShrinkFactor(std::pow(m_GrowthFactor, -0.25))
   , m_CurrentCost(0)
-
 {
   m_StopConditionDescription.str("");
 }

@@ -34,7 +34,6 @@ SymmetricForcesDemonsRegistrationFunction<TFixedImage, TMovingImage, TDisplaceme
   , m_IntensityDifferenceThreshold(0.001)
   , m_Metric(NumericTraits<double>::max())
   , m_RMSChange(NumericTraits<double>::max())
-
 {
   constexpr RadiusType r{};
   this->SetRadius(r);

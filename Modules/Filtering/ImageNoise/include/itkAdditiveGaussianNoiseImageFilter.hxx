@@ -29,7 +29,6 @@ namespace itk
 
 template <class TInputImage, class TOutputImage>
 AdditiveGaussianNoiseImageFilter<TInputImage, TOutputImage>::AdditiveGaussianNoiseImageFilter()
-
 {
   this->DynamicMultiThreadingOff();
   this->ThreaderUpdateProgressOff();

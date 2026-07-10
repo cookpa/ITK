@@ -34,7 +34,6 @@ template <typename TCoordinate>
 VoronoiDiagram2DGenerator<TCoordinate>::VoronoiDiagram2DGenerator()
   : m_OutputVD(Self::GetOutput())
   , m_BottomSite(nullptr)
-
 {
   m_VorBoundary.Fill(0.0);
 }

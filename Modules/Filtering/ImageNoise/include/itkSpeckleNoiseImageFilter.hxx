@@ -29,7 +29,6 @@ namespace itk
 
 template <class TInputImage, class TOutputImage>
 SpeckleNoiseImageFilter<TInputImage, TOutputImage>::SpeckleNoiseImageFilter()
-
 {
   this->DynamicMultiThreadingOff();
   this->ThreaderUpdateProgressOff();

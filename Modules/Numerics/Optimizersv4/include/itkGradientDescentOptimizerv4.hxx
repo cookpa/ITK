@@ -29,7 +29,6 @@ GradientDescentOptimizerv4Template<TInternalComputationValueType>::GradientDesce
   , m_MinimumConvergenceValue(1e-8)
   , m_ConvergenceValue(NumericTraits<TInternalComputationValueType>::max())
   , m_CurrentBestValue(NumericTraits<MeasureType>::max())
-
 {
   this->m_PreviousGradient.Fill(TInternalComputationValueType{});
 }

@@ -25,7 +25,6 @@ namespace itk
 
 template <unsigned int TPointDimension>
 TubeSpatialObjectPoint<TPointDimension>::TubeSpatialObjectPoint()
-
 {
   m_TangentInObjectSpace.Fill(0);
   m_Normal1InObjectSpace.Fill(0);

@@ -28,7 +28,6 @@ namespace itk
 template <typename TImage, typename TAttributeAccessor>
 AttributeOpeningLabelMapFilter<TImage, TAttributeAccessor>::AttributeOpeningLabelMapFilter()
   : m_Lambda(AttributeValueType{})
-
 {
   // create the output image for the removed objects
   this->SetNumberOfRequiredOutputs(2);

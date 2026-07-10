@@ -30,7 +30,6 @@ namespace itk
 
 template <class TInputImage, class TOutputImage>
 ShotNoiseImageFilter<TInputImage, TOutputImage>::ShotNoiseImageFilter()
-
 {
   this->DynamicMultiThreadingOff();
   this->ThreaderUpdateProgressOff();

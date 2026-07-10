@@ -206,8 +206,6 @@ TIFFImageIO::Read(void * buffer)
 TIFFImageIO::TIFFImageIO()
   : m_InternalImage(new TIFFReaderInternal)
   , m_ColorPalette(0)
-
-
 {
   this->SetNumberOfDimensions(2);
   this->Self::SetJPEGQuality(75);

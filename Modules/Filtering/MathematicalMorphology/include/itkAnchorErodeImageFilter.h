@@ -25,7 +25,6 @@ namespace itk
 template <typename TImage, typename TKernel>
 class AnchorErodeImageFilter
   : public AnchorErodeDilateImageFilter<TImage, TKernel, std::less<typename TImage::PixelType>>
-
 {
 public:
   ITK_DISALLOW_COPY_AND_MOVE(AnchorErodeImageFilter);

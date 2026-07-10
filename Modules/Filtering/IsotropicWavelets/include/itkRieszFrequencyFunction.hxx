@@ -26,7 +26,6 @@ namespace itk
 {
 template <typename TFunctionValue, unsigned int VImageDimension, typename TInput>
 RieszFrequencyFunction<TFunctionValue, VImageDimension, TInput>::RieszFrequencyFunction()
-
 {
   // SetOrder also sets m_Indices.
   this->SetOrder(1);

@@ -33,7 +33,6 @@ HistogramMatchingImageFilter<TInputImage, TOutputImage, THistogramMeasurement>::
   , m_ReferenceMaxValue(THistogramMeasurement{})
   , m_SourceHistogram(HistogramType::New())
   , m_OutputHistogram(HistogramType::New())
-
 {
   this->SetNumberOfRequiredInputs(1);
   Self::SetPrimaryInputName("SourceImage");

@@ -26,7 +26,6 @@ namespace itk
 
 template <typename TImage, typename TAttributeAccessor>
 AttributeSelectionLabelMapFilter<TImage, TAttributeAccessor>::AttributeSelectionLabelMapFilter()
-
 {
   m_AttributeSet.clear();
   this->SetNumberOfRequiredOutputs(2);

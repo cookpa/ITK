@@ -39,7 +39,6 @@ PolylineMaskImageFilter<TInputImage, TPolyline, TVector, TOutputImage>::Polyline
   , m_UpVector(MakeFilled<VectorType>(1))
   , m_CameraCenterPoint(0)
   , m_FocalPoint()
-
 {
   this->SetNumberOfRequiredInputs(2);
 

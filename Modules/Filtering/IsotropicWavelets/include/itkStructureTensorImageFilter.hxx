@@ -32,8 +32,6 @@ namespace itk
 {
 template <typename TInputImage, typename TOutputImage>
 StructureTensorImageFilter<TInputImage, TOutputImage>::StructureTensorImageFilter()
-
-
 {
   this->m_GaussianSource = GaussianSourceType::New();
 

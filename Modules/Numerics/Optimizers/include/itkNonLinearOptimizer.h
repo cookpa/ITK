@@ -33,7 +33,6 @@ namespace itk
  * \ingroup ITKOptimizers
  */
 class ITKOptimizers_EXPORT NonLinearOptimizer : public Optimizer
-
 {
 public:
   ITK_DISALLOW_COPY_AND_MOVE(NonLinearOptimizer);

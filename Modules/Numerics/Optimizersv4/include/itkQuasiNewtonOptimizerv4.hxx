@@ -29,7 +29,6 @@ QuasiNewtonOptimizerv4Template<TInternalComputationValueType>::QuasiNewtonOptimi
   , m_BestValue(0.0)
   , m_BestPosition(0)
   , m_MaximumNewtonStepSizeInPhysicalUnits(TInternalComputationValueType{})
-
 {
   this->m_LearningRate = NumericTraits<TInternalComputationValueType>::OneValue();
 

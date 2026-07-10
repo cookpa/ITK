@@ -26,7 +26,6 @@ namespace itk
 
 template <typename TImage>
 FlipImageFilter<TImage>::FlipImageFilter()
-
 {
   m_FlipAxes.Fill(false);
   this->DynamicMultiThreadingOn();

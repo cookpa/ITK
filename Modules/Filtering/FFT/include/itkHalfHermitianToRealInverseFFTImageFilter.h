@@ -56,7 +56,6 @@ template <typename TInputImage,
           typename TOutputImage = Image<typename TInputImage::PixelType::value_type, TInputImage::ImageDimension>>
 class ITK_TEMPLATE_EXPORT HalfHermitianToRealInverseFFTImageFilter
   : public ImageToImageFilter<TInputImage, TOutputImage>
-
 {
 public:
   ITK_DISALLOW_COPY_AND_MOVE(HalfHermitianToRealInverseFFTImageFilter);

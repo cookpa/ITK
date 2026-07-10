@@ -28,7 +28,6 @@ namespace itk
 
 template <typename TOutputImage>
 GaborImageSource<TOutputImage>::GaborImageSource()
-
 {
   // Gabor parameters, defined so that the Gaussian
   // is centered in the default image

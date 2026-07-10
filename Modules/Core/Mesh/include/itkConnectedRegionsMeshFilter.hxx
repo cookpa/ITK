@@ -43,7 +43,6 @@ ConnectedRegionsMeshFilter<TInputMesh, TOutputMesh>::ConnectedRegionsMeshFilter(
   : m_ExtractionMode(Self::LargestRegion)
   , m_NumberOfCellsInRegion(SizeValueType{})
   , m_RegionNumber(IdentifierType{})
-
 {
   m_ClosestPoint.Fill(0);
 }

@@ -28,7 +28,6 @@ namespace itk
 
 template <typename TInputImage, typename TOutputImage>
 LaplacianRecursiveGaussianImageFilter<TInputImage, TOutputImage>::LaplacianRecursiveGaussianImageFilter()
-
 {
   std::generate(m_SmoothingFilters.begin(), m_SmoothingFilters.end(), [this] {
     const auto filter = GaussianFilterType::New();

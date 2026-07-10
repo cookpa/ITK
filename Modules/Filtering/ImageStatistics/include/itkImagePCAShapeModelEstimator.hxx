@@ -24,7 +24,6 @@ namespace itk
 {
 template <typename TInputImage, typename TOutputImage>
 ImagePCAShapeModelEstimator<TInputImage, TOutputImage>::ImagePCAShapeModelEstimator()
-
 {
   m_EigenVectors.set_size(0, 0);
   m_EigenValues.set_size(0);

@@ -73,7 +73,6 @@ KdTree<TSample>::KdTree()
   , m_Root(nullptr)
   , m_EmptyTerminalNode(new KdTreeTerminalNode<TSample>())
   , m_DistanceMetric(DistanceMetricType::New())
-
 {}
 
 template <typename TSample>

@@ -1347,7 +1347,6 @@ RayCastInterpolateImageFunction<TInputImage, TCoordinate>::RayCastHelper::ZeroSt
 
 template <typename TInputImage, typename TCoordinate>
 RayCastInterpolateImageFunction<TInputImage, TCoordinate>::RayCastInterpolateImageFunction()
-
 {
   m_FocalPoint[0] = 0.;
   m_FocalPoint[1] = 0.;

@@ -37,7 +37,6 @@ VotingBinaryIterativeHoleFillingImageFilter<TInputImage>::VotingBinaryIterativeH
   , m_BackgroundValue(InputPixelType{})
   , m_MaximumNumberOfIterations(10)
   , m_MajorityThreshold(1)
-
 {
   m_Radius.Fill(1);
 }

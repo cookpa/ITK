@@ -30,7 +30,6 @@ namespace itk
 template <typename TTimeVaryingVelocityField, typename TDisplacementField>
 TimeVaryingVelocityFieldIntegrationImageFilter<TTimeVaryingVelocityField,
                                                TDisplacementField>::TimeVaryingVelocityFieldIntegrationImageFilter()
-
 {
   this->m_LowerTimeBound = 0.0, this->m_UpperTimeBound = 1.0, this->m_NumberOfIntegrationSteps = 100;
   this->SetNumberOfRequiredInputs(1);

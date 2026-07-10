@@ -26,7 +26,6 @@ namespace itk
 {
 template <typename TInputImage, typename TOutputImage>
 JoinSeriesImageFilter<TInputImage, TOutputImage>::JoinSeriesImageFilter()
-
 {
   this->DynamicMultiThreadingOn();
   this->ThreaderUpdateProgressOff();

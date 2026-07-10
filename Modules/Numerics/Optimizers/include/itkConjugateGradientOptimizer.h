@@ -33,7 +33,6 @@ namespace itk
  * \ingroup ITKOptimizers
  */
 class ITKOptimizers_EXPORT ConjugateGradientOptimizer : public SingleValuedNonLinearVnlOptimizer
-
 {
 public:
   ITK_DISALLOW_COPY_AND_MOVE(ConjugateGradientOptimizer);

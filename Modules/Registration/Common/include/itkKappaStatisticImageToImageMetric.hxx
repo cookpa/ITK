@@ -27,7 +27,6 @@ namespace itk
 template <typename TFixedImage, typename TMovingImage>
 KappaStatisticImageToImageMetric<TFixedImage, TMovingImage>::KappaStatisticImageToImageMetric()
   : m_ForegroundValue(255)
-
 {
   this->SetComputeGradient(true);
 }

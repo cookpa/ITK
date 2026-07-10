@@ -23,7 +23,6 @@ namespace itk::Statistics
 
 template <typename TSample, typename TRegion>
 SpatialNeighborSubsampler<TSample, TRegion>::SpatialNeighborSubsampler()
-
 {
   this->m_Radius.Fill(1);
 }

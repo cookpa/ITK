@@ -26,7 +26,6 @@ namespace itk
 template <typename TInputImage, typename TOutputImage>
 OtsuMultipleThresholdsImageFilter<TInputImage, TOutputImage>::OtsuMultipleThresholdsImageFilter()
   : m_LabelOffset(OutputPixelType{})
-
 {}
 
 template <typename TInputImage, typename TOutputImage>

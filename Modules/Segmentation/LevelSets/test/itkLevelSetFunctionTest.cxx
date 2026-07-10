@@ -70,7 +70,6 @@ square(unsigned int x, unsigned int y)
 // Evaluates a function at each pixel in the itk image
 void
 evaluate_function(itk::Image<float, 2> * im, float (*f)(unsigned int, unsigned int))
-
 {
   itk::Image<float, 2>::IndexType idx;
   for (unsigned int x = 0; x < WIDTH; ++x)

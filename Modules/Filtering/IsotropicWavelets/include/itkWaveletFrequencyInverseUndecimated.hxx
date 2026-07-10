@@ -29,8 +29,6 @@ namespace itk
 {
 template <typename TInputImage, typename TOutputImage, typename TWaveletFilterBank>
 WaveletFrequencyInverseUndecimated<TInputImage, TOutputImage, TWaveletFilterBank>::WaveletFrequencyInverseUndecimated()
-
-
 {
   this->SetNumberOfRequiredOutputs(1);
   this->m_WaveletFilterBank = WaveletFilterBankType::New();

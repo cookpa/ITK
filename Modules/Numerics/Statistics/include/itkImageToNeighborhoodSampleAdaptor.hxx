@@ -29,7 +29,6 @@ template <typename TImage, typename TBoundaryCondition>
 ImageToNeighborhoodSampleAdaptor<TImage, TBoundaryCondition>::ImageToNeighborhoodSampleAdaptor()
   : m_Image(nullptr)
   , m_InstanceIdentifierInternal(0)
-
 {
   m_Radius.Fill(0);
   m_NeighborIndexInternal.Fill(0);

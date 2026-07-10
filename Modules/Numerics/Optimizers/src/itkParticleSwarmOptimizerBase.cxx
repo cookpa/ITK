@@ -28,8 +28,6 @@ ParticleSwarmOptimizerBase::ParticleSwarmOptimizerBase()
   , m_NumberOfGenerationsWithMinimalImprovement(1)
   , m_PercentageParticlesConverged(0.6)
   , m_FunctionConvergenceTolerance(1e-4)
-
-
 {
   this->m_ParametersConvergenceTolerance.Fill(1e-8);
 }
