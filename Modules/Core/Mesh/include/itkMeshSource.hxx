@@ -26,12 +26,10 @@ template <typename TOutputMesh>
 MeshSource<TOutputMesh>::MeshSource()
 
 {
-  // Create the output. We use static_cast<> here because we know the default
-  // output must be of type TOutputMesh
-  const OutputMeshPointer output = static_cast<TOutputMesh *>(this->MakeOutput(0).GetPointer());
-
   this->ProcessObject::SetNumberOfRequiredOutputs(1);
-  this->ProcessObject::SetNthOutput(0, output.GetPointer());
+
+  // Equivalent to SetNthOutput(0, MakeOutput(0)); in this case, calling MakeOutput is not necessary.
+  this->ProcessObject::SetNthOutput(0, TOutputMesh::New());
 }
 
 template <typename TOutputMesh>
