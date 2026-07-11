@@ -642,10 +642,17 @@ SLICImageFilter<TInputImage, TOutputImage, TDistancePixel>::GenerateData()
     for (size_t i = 0; i * numberOfClusterComponents < m_Clusters.size(); ++i)
     {
 
-      ClusterType cluster(numberOfClusterComponents, &m_Clusters[i * numberOfClusterComponents]);
-      cluster /= clusterCount[i];
-
+      ClusterType       cluster(numberOfClusterComponents, &m_Clusters[i * numberOfClusterComponents]);
       const ClusterType oldCluster(numberOfClusterComponents, &m_OldClusters[i * numberOfClusterComponents]);
+      if (clusterCount[i] > 0)
+      {
+        cluster /= clusterCount[i];
+      }
+      else
+      {
+        // Empty cluster: keep the previous centroid to avoid a NaN center.
+        cluster.copy_in(oldCluster.data_block());
+      }
       l1Residual += Distance(cluster, oldCluster);
     }
 
