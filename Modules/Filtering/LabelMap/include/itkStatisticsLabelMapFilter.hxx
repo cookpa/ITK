@@ -233,7 +233,7 @@ StatisticsLabelMapFilter<TImage, TFeatureImage>::ThreadedProcessLabelObject(Labe
     for (unsigned int i = 0; i < ImageDimension; ++i)
     {
       //    principalMoments[i] = 4 * std::sqrt( pm(i,i) );
-      principalMoments[i] = pm(i);
+      principalMoments[i] = std::max(pm(i), 0.0);
     }
     principalAxes = eigen.V.transpose();
 
@@ -258,12 +258,18 @@ StatisticsLabelMapFilter<TImage, TFeatureImage>::ThreadedProcessLabelObject(Labe
       elongation = 1;
       flatness = 1;
     }
-    else if (Math::NotAlmostEquals(principalMoments[0], typename VectorType::ValueType{}))
+    else
     {
-      //    elongation = principalMoments[ImageDimension-1] /
-      // principalMoments[0];
-      elongation = std::sqrt(principalMoments[ImageDimension - 1] / principalMoments[ImageDimension - 2]);
-      flatness = std::sqrt(principalMoments[1] / principalMoments[0]);
+      if (Math::NotAlmostEquals(principalMoments[0], typename VectorType::ValueType{}))
+      {
+        const double flatnessRatio = principalMoments[1] / principalMoments[0];
+        flatness = (flatnessRatio > 0.0) ? std::sqrt(flatnessRatio) : 0.0;
+      }
+      if (Math::NotAlmostEquals(principalMoments[ImageDimension - 2], typename VectorType::ValueType{}))
+      {
+        const double elongationRatio = principalMoments[ImageDimension - 1] / principalMoments[ImageDimension - 2];
+        elongation = (elongationRatio > 0.0) ? std::sqrt(elongationRatio) : 0.0;
+      }
     }
   }
   else
