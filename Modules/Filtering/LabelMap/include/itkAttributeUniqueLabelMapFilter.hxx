@@ -236,7 +236,7 @@ AttributeUniqueLabelMapFilter<TImage, TAttributeAccessor>::GenerateData()
 
   // remove objects without lines
   typename ImageType::Iterator it(this->GetLabelMap());
-  while (it.IsAtEnd())
+  while (!it.IsAtEnd())
   {
     const typename LabelObjectType::LabelType label = it.GetLabel();
     LabelObjectType *                         labelObject = it.GetLabelObject();
