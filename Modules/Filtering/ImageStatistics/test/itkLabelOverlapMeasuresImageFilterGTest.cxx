@@ -204,3 +204,19 @@ TEST_F(LabelOverlapMeasuresImageFilterFixture, test3)
   EXPECT_NEAR(filter->GetFalsePositiveError(2), 4.76837612950e-07, 1e-17);
   EXPECT_NEAR(filter->GetFalseDiscoveryRate(2), 1.0 / 3.0, 0.0);
 }
+
+// A label covering the whole image has FP = TN = 0; the zero denominator must map to
+// the degenerate-value convention, not NaN (issue #6575, B12).
+TEST_F(LabelOverlapMeasuresImageFilterFixture, WholeImageLabelFalsePositiveError)
+{
+  auto source = Utils::CreateImage(1);
+  auto target = Utils::CreateImage(1);
+
+  auto filter = Utils::FilterType::New();
+  filter->SetSourceImage(source);
+  filter->SetTargetImage(target);
+  filter->Update();
+
+  using RealType = Utils::FilterType::RealType;
+  EXPECT_EQ(filter->GetFalsePositiveError(1), itk::NumericTraits<RealType>::max());
+}
