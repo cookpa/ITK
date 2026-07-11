@@ -15,6 +15,7 @@ createtestdriver(ITKDeconvolution "${ITKDeconvolution-Test_LIBRARIES}" "${ITKDec
 set(
   ITKDeconvolutionGTests
   itkProjectedIterativeDeconvolutionImageFilterGTest.cxx
+  itkWienerDeconvolutionImageFilterGTest.cxx
 )
 
 creategoogletestdriver(ITKDeconvolution "${ITKDeconvolution-Test_LIBRARIES}" "${ITKDeconvolutionGTests}")
