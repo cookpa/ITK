@@ -74,6 +74,11 @@ public:
     // AdaptiveHistogramEqualization compute kernel components with
     // float, but use double for accumulate and temporaries.
     const double iscale = static_cast<double>(m_Maximum) - m_Minimum;
+    if (iscale == 0.0)
+    {
+      // Constant image: equalization is an identity mapping.
+      return static_cast<TOutputPixel>(pixel);
+    }
 
     double         sum = 0.0;
     auto           itMap = m_Map.begin();
