@@ -396,6 +396,7 @@ itk_add_test(
 
 set(
   ITKSmoothingGTests
+  itkBoxSigmaImageFilterGTest.cxx
   itkMeanImageFilterGTest.cxx
   itkMedianImageFilterGTest.cxx
 )
