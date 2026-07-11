@@ -140,10 +140,19 @@ LabelMapMaskImageFilter<TInputImage, TOutputImage>::GenerateOutputInformation()
         }
 
         // Final computation
-        SizeType regionSize;
-        for (unsigned int i = 0; i < ImageDimension; ++i)
+        SizeType regionSize{};
+        if (maxs[0] >= mins[0])
         {
-          regionSize[i] = maxs[i] - mins[i] + 1;
+          for (unsigned int i = 0; i < ImageDimension; ++i)
+          {
+            regionSize[i] = maxs[i] - mins[i] + 1;
+          }
+        }
+        else
+        {
+          // No matching object lines: use an empty region rather than overflowing
+          // the size with the uninitialized min/max sentinels.
+          mins.Fill(0);
         }
         cropRegion = { mins, regionSize };
       }
@@ -194,10 +203,19 @@ LabelMapMaskImageFilter<TInputImage, TOutputImage>::GenerateOutputInformation()
           ++lit;
         }
         // Final computation
-        SizeType regionSize;
-        for (unsigned int i = 0; i < ImageDimension; ++i)
+        SizeType regionSize{};
+        if (maxs[0] >= mins[0])
         {
-          regionSize[i] = maxs[i] - mins[i] + 1;
+          for (unsigned int i = 0; i < ImageDimension; ++i)
+          {
+            regionSize[i] = maxs[i] - mins[i] + 1;
+          }
+        }
+        else
+        {
+          // No matching object lines: use an empty region rather than overflowing
+          // the size with the uninitialized min/max sentinels.
+          mins.Fill(0);
         }
         cropRegion = { mins, regionSize };
       }
