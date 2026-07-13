@@ -72,7 +72,7 @@ ScalarToRGBColormapImageFilter<TInputImage, TOutputImage>::BeforeThreadedGenerat
     ImageRegionConstIterator It(this->GetInput(), this->GetInput()->GetRequestedRegion());
 
     InputImagePixelType minimumValue = NumericTraits<InputImagePixelType>::max();
-    InputImagePixelType maximumValue = NumericTraits<InputImagePixelType>::min();
+    InputImagePixelType maximumValue = NumericTraits<InputImagePixelType>::NonpositiveMin();
 
     for (It.GoToBegin(); !It.IsAtEnd(); ++It)
     {
