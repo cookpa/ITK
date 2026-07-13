@@ -18,6 +18,7 @@
 #include "itkGiplImageIO.h"
 #include "itkByteSwapper.h"
 #include "itkMakeUniqueForOverwrite.h"
+#include <algorithm>
 #include <iostream>
 #include "itk_zlib.h"
 
@@ -198,46 +199,45 @@ GiplImageIO::CanWriteFile(const char * name)
 void
 GiplImageIO::Read(void * buffer)
 {
-  const uint32_t dimensions = this->GetNumberOfDimensions();
-  uint32_t       numberOfPixels = 1;
+  const unsigned int dimensions = this->GetNumberOfDimensions();
+  SizeValueType      numberOfPixels = 1;
 
   for (unsigned int dim = 0; dim < dimensions; ++dim)
   {
-    numberOfPixels *= static_cast<uint32_t>(m_Dimensions[dim]);
+    numberOfPixels *= m_Dimensions[dim];
   }
 
-  auto * p = static_cast<char *>(buffer);
+  auto *         p = static_cast<char *>(buffer);
+  const SizeType expectedBytes = this->GetImageSizeInBytes();
+  SizeType       bytesRead = 0;
+  bool           success = false;
   if (m_IsCompressed)
   {
-    gzread(m_Internal->m_GzFile, p, static_cast<unsigned int>(this->GetImageSizeInBytes()));
-  }
-  else
-  {
-    m_Ifstream.read(p, static_cast<std::streamsize>(this->GetImageSizeInBytes()));
-  }
-
-  bool success = false;
-  if (m_IsCompressed)
-  {
-    success = p != nullptr;
-  }
-  else
-  {
-    success = !m_Ifstream.bad();
-  }
-
-  if (m_IsCompressed)
-  {
+    // gzread rejects requests over INT_MAX, so read in chunks and total the byte count in 64 bits.
+    while (bytesRead < expectedBytes)
+    {
+      const auto chunk = static_cast<unsigned int>(std::min(expectedBytes - bytesRead, SizeType{ 1 } << 30));
+      const int  count = gzread(m_Internal->m_GzFile, p, chunk);
+      if (count <= 0)
+      {
+        break;
+      }
+      p += count;
+      bytesRead += static_cast<SizeType>(count);
+    }
+    success = (bytesRead == expectedBytes);
     gzclose(m_Internal->m_GzFile);
     m_Internal->m_GzFile = nullptr;
   }
   else
   {
+    success = this->ReadBufferAsBinary(m_Ifstream, buffer, expectedBytes);
+    bytesRead = static_cast<SizeType>(std::max(m_Ifstream.gcount(), std::streamsize{ 0 }));
     m_Ifstream.close();
   }
   if (!success)
   {
-    itkExceptionStringMacro("Error reading image data.");
+    itkExceptionMacro("Error reading image data: read " << bytesRead << " of " << expectedBytes << " expected bytes.");
   }
 
   SwapBytesIfNecessary(buffer, numberOfPixels);
@@ -584,6 +584,23 @@ GiplImageIO::ReadImageInformation()
   }
 }
 
+namespace
+{
+template <typename TComponent>
+void
+SwapRange(void * buffer, SizeValueType numberOfPixels, IOByteOrderEnum byteOrder)
+{
+  if (byteOrder == IOByteOrderEnum::LittleEndian)
+  {
+    ByteSwapper<TComponent>::SwapRangeFromSystemToLittleEndian(static_cast<TComponent *>(buffer), numberOfPixels);
+  }
+  else if (byteOrder == IOByteOrderEnum::BigEndian)
+  {
+    ByteSwapper<TComponent>::SwapRangeFromSystemToBigEndian(static_cast<TComponent *>(buffer), numberOfPixels);
+  }
+}
+} // namespace
+
 void
 GiplImageIO::SwapBytesIfNecessary(void * buffer, SizeValueType numberOfPixels)
 {
@@ -591,60 +608,26 @@ GiplImageIO::SwapBytesIfNecessary(void * buffer, SizeValueType numberOfPixels)
   {
     case IOComponentEnum::SCHAR:
     case IOComponentEnum::UCHAR:
-    {
-      // For CHAR and UCHAR, it is not necessary to swap bytes.
+      // Single-byte components need no swapping.
       break;
-    }
     case IOComponentEnum::SHORT:
-    {
-      if (m_ByteOrder == IOByteOrderEnum::LittleEndian)
-      {
-        ByteSwapper<short>::SwapRangeFromSystemToLittleEndian(static_cast<short *>(buffer), numberOfPixels);
-      }
-      else if (m_ByteOrder == IOByteOrderEnum::BigEndian)
-      {
-        ByteSwapper<short>::SwapRangeFromSystemToBigEndian(static_cast<short *>(buffer), numberOfPixels);
-      }
+      SwapRange<short>(buffer, numberOfPixels, m_ByteOrder);
       break;
-    }
     case IOComponentEnum::USHORT:
-    {
-      if (m_ByteOrder == IOByteOrderEnum::LittleEndian)
-      {
-        ByteSwapper<unsigned short>::SwapRangeFromSystemToLittleEndian(static_cast<unsigned short *>(buffer),
-                                                                       numberOfPixels);
-      }
-      else if (m_ByteOrder == IOByteOrderEnum::BigEndian)
-      {
-        ByteSwapper<unsigned short>::SwapRangeFromSystemToBigEndian(static_cast<unsigned short *>(buffer),
-                                                                    numberOfPixels);
-      }
+      SwapRange<unsigned short>(buffer, numberOfPixels, m_ByteOrder);
       break;
-    }
+    case IOComponentEnum::INT:
+      SwapRange<int>(buffer, numberOfPixels, m_ByteOrder);
+      break;
+    case IOComponentEnum::UINT:
+      SwapRange<unsigned int>(buffer, numberOfPixels, m_ByteOrder);
+      break;
     case IOComponentEnum::FLOAT:
-    {
-      if (m_ByteOrder == IOByteOrderEnum::LittleEndian)
-      {
-        ByteSwapper<float>::SwapRangeFromSystemToLittleEndian(static_cast<float *>(buffer), numberOfPixels);
-      }
-      else if (m_ByteOrder == IOByteOrderEnum::BigEndian)
-      {
-        ByteSwapper<float>::SwapRangeFromSystemToBigEndian(static_cast<float *>(buffer), numberOfPixels);
-      }
+      SwapRange<float>(buffer, numberOfPixels, m_ByteOrder);
       break;
-    }
     case IOComponentEnum::DOUBLE:
-    {
-      if (m_ByteOrder == IOByteOrderEnum::LittleEndian)
-      {
-        ByteSwapper<double>::SwapRangeFromSystemToLittleEndian(static_cast<double *>(buffer), numberOfPixels);
-      }
-      else if (m_ByteOrder == IOByteOrderEnum::BigEndian)
-      {
-        ByteSwapper<double>::SwapRangeFromSystemToBigEndian(static_cast<double *>(buffer), numberOfPixels);
-      }
+      SwapRange<double>(buffer, numberOfPixels, m_ByteOrder);
       break;
-    }
     default:
       ExceptionObject exception(__FILE__, __LINE__);
       exception.SetDescription("Pixel Type Unknown");
@@ -663,6 +646,43 @@ void
 GiplImageIO::Write(const void * buffer)
 {
   CheckExtension(m_FileName.c_str());
+
+  if (this->GetNumberOfComponents() != 1)
+  {
+    itkExceptionMacro("GIPL format cannot store multi-component pixels: " << this->GetNumberOfComponents()
+                                                                          << " components.");
+  }
+
+  unsigned short image_type = 0;
+  switch (m_ComponentType)
+  {
+    case IOComponentEnum::SCHAR:
+      image_type = GIPL_CHAR;
+      break;
+    case IOComponentEnum::UCHAR:
+      image_type = GIPL_U_CHAR;
+      break;
+    case IOComponentEnum::SHORT:
+      image_type = GIPL_SHORT;
+      break;
+    case IOComponentEnum::USHORT:
+      image_type = GIPL_U_SHORT;
+      break;
+    case IOComponentEnum::UINT:
+      image_type = GIPL_U_INT;
+      break;
+    case IOComponentEnum::INT:
+      image_type = GIPL_INT;
+      break;
+    case IOComponentEnum::FLOAT:
+      image_type = GIPL_FLOAT;
+      break;
+    case IOComponentEnum::DOUBLE:
+      image_type = GIPL_DOUBLE;
+      break;
+    default:
+      itkExceptionMacro("Invalid type: " << m_ComponentType);
+  }
 
   const unsigned int nDims = this->GetNumberOfDimensions();
 
@@ -727,37 +747,6 @@ GiplImageIO::Write(const void * buffer)
         m_Ofstream.write(reinterpret_cast<char *>(&value), sizeof(unsigned short));
       }
     }
-  }
-
-  unsigned short image_type = 0;
-  switch (m_ComponentType)
-  {
-    case IOComponentEnum::SCHAR:
-      image_type = GIPL_CHAR;
-      break;
-    case IOComponentEnum::UCHAR:
-      image_type = GIPL_U_CHAR;
-      break;
-    case IOComponentEnum::SHORT:
-      image_type = GIPL_SHORT;
-      break;
-    case IOComponentEnum::USHORT:
-      image_type = GIPL_U_SHORT;
-      break;
-    case IOComponentEnum::UINT:
-      image_type = GIPL_U_INT;
-      break;
-    case IOComponentEnum::INT:
-      image_type = GIPL_INT;
-      break;
-    case IOComponentEnum::FLOAT:
-      image_type = GIPL_FLOAT;
-      break;
-    case IOComponentEnum::DOUBLE:
-      image_type = GIPL_DOUBLE;
-      break;
-    default:
-      itkExceptionMacro("Invalid type: " << m_ComponentType);
   }
 
   if (m_ByteOrder == IOByteOrderEnum::BigEndian)
