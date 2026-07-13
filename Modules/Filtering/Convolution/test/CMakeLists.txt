@@ -755,3 +755,7 @@ itk_add_test(
   ITK_REMOVE_TEMPORARY_TEST_FILES
     ${ITK_TEST_OUTPUT_DIR}/itkFFTConvolutionImageFilterStreamingValidTestOutput.mha
 )
+
+set(ITKConvolutionGTests itkNormalizedCorrelationImageFilterGTest.cxx)
+
+creategoogletestdriver(ITKConvolution "${ITKConvolution-Test_LIBRARIES}" "${ITKConvolutionGTests}")
