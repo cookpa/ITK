@@ -23,7 +23,7 @@ itk_add_test(
     ${ITK_TEST_OUTPUT_DIR}/sphere00.vtk
 )
 itk_add_test(
-  NAME itkMeshFileReadWriteTest01
+  NAME itkMeshFileReadWriteVTKTest01
   COMMAND
     ITKIOMeshVTKTestDriver
     itkMeshFileReadWriteTest
