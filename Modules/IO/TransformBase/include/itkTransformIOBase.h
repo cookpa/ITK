@@ -190,6 +190,10 @@ TransformIOBaseTemplate<float>::CorrectTransformPrecisionType(std::string & inpu
   if (inputTransformName.find("float") == std::string::npos)
   {
     const std::string::size_type begin = inputTransformName.find("double");
+    if (begin == std::string::npos)
+    {
+      itkGenericExceptionMacro("Transform type name has neither float nor double precision: " << inputTransformName);
+    }
     inputTransformName.replace(begin, 6, "float");
   }
 }
@@ -202,6 +206,10 @@ TransformIOBaseTemplate<double>::CorrectTransformPrecisionType(std::string & inp
   if (inputTransformName.find("double") == std::string::npos)
   {
     const std::string::size_type begin = inputTransformName.find("float");
+    if (begin == std::string::npos)
+    {
+      itkGenericExceptionMacro("Transform type name has neither float nor double precision: " << inputTransformName);
+    }
     inputTransformName.replace(begin, 5, "double");
   }
 }

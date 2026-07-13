@@ -19,3 +19,7 @@ itk_add_test(
     ITKIOTransformBaseTestDriver
     itkTransformFileWriterTest
 )
+
+set(ITKIOTransformBaseGTests itkTransformIOBaseGTest.cxx)
+
+creategoogletestdriver(ITKIOTransformBase "${ITKIOTransformBase-Test_LIBRARIES}" "${ITKIOTransformBaseGTests}")
