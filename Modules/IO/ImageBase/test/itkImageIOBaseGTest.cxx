@@ -24,6 +24,8 @@
 
 #include "itkImageIOFactory.h" // required to instantiate an instance of ImageIOBase
 
+#include <sstream>
+
 namespace
 {
 // Tests `MapPixelType<TPixel>::CType` and the estimation of component type traits.
@@ -324,4 +326,50 @@ TEST(ImageIOBase, ConvertedLegacyTest)
     EXPECT_EQ(imageIO->GetPixelType(), IOPixelEnum::VARIABLESIZEMATRIX);
     EXPECT_EQ(imageIO->GetComponentType(), IOComponentEnum::DOUBLE);
   }
+}
+
+namespace
+{
+class TestableImageIOBase : public itk::ImageIOBase
+{
+public:
+  using Self = TestableImageIOBase;
+  using Superclass = itk::ImageIOBase;
+  using Pointer = itk::SmartPointer<Self>;
+
+  itkNewMacro(Self);
+
+  using itk::ImageIOBase::ReadBufferAsASCII;
+
+  bool
+  CanReadFile(const char *) override
+  {
+    return false;
+  }
+  void
+  ReadImageInformation() override
+  {}
+  void
+  Read(void *) override
+  {}
+  bool
+  CanWriteFile(const char *) override
+  {
+    return false;
+  }
+  void
+  WriteImageInformation() override
+  {}
+  void
+  Write(const void *) override
+  {}
+};
+} // namespace
+
+TEST(ImageIOBase, ReadBufferAsASCIIThrowsOnOverflowingField)
+{
+  std::istringstream           is("5 99999 7 8");
+  short                        buffer[4] = { 0, 0, 0, 0 };
+  TestableImageIOBase::Pointer io = TestableImageIOBase::New();
+  EXPECT_THROW(io->ReadBufferAsASCII(is, buffer, itk::IOComponentEnum::SHORT, 4), itk::ExceptionObject);
 }
