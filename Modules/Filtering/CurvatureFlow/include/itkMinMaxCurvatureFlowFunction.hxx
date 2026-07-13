@@ -308,7 +308,7 @@ MinMaxCurvatureFlowFunction<TImage>::ComputeThreshold(const Dispatch<3> &, const
     return threshold;
   }
 
-  gradMagnitude = std::sqrt(gradMagnitude) / static_cast<PixelType>(m_StencilRadius);
+  gradMagnitude = std::sqrt(gradMagnitude);
 
   for (double & j : gradient)
   {
