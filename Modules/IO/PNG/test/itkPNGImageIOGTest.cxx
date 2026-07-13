@@ -46,16 +46,24 @@ itk::PNGImageIO::Pointer
 MakeWriter(const std::string &  path,
            unsigned int         width,
            unsigned int         height,
-           itk::IOComponentEnum componentType = itk::IOComponentEnum::UCHAR)
+           itk::IOComponentEnum componentType = itk::IOComponentEnum::UCHAR,
+           unsigned int         numComp = 1)
 {
   auto io = itk::PNGImageIO::New();
   io->SetFileName(path);
   io->SetNumberOfDimensions(2);
   io->SetDimensions(0, width);
   io->SetDimensions(1, height);
-  io->SetPixelType(itk::IOPixelEnum::SCALAR);
+  if (numComp > 1)
+  {
+    io->SetPixelType(itk::IOPixelEnum::VECTOR);
+  }
+  else
+  {
+    io->SetPixelType(itk::IOPixelEnum::SCALAR);
+  }
   io->SetComponentType(componentType);
-  io->SetNumberOfComponents(1);
+  io->SetNumberOfComponents(numComp);
   return io;
 }
 
@@ -92,4 +100,19 @@ TEST(PNGImageIOWriteSlice, RejectsUnsupportedComponentTypeAndPreservesExistingFi
   std::vector<unsigned char> readBuffer(4 * 4, 0);
   ASSERT_NO_THROW(readIO->Read(readBuffer.data()));
   EXPECT_EQ(readBuffer[0], 128);
+}
+
+TEST(PNGImageIOWriteSlice, RejectsUnsupportedComponentCountAndPreservesExistingFile)
+{
+  const std::string path = MakeOutputPath("PNGImageIOWriteSlice_B72.png");
+  WriteValidGrayscalePNG(path, 4, 4);
+  const std::vector<char> before = ReadFileBytes(path);
+  ASSERT_FALSE(before.empty());
+
+  const auto                       io = MakeWriter(path, 4, 4, itk::IOComponentEnum::UCHAR, 5);
+  const std::vector<unsigned char> buffer(4 * 4 * 5, 3);
+  EXPECT_THROW(io->Write(buffer.data()), itk::ExceptionObject);
+
+  const std::vector<char> after = ReadFileBytes(path);
+  EXPECT_EQ(before, after);
 }

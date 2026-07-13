@@ -525,6 +525,12 @@ PNGImageIO::WriteSlice(const std::string & fileName, const void * const buffer)
       itkExceptionMacro("PNG supports unsigned char and unsigned short");
   }
 
+  const unsigned int numComp = this->GetNumberOfComponents();
+  if (numComp < 1 || numComp > 4)
+  {
+    itkExceptionMacro("PNG supports 1 to 4 components per pixel");
+  }
+
   // use this class so return will call close
   const PNGFileWrapper pngfp(fileName.c_str(), "wb");
   FILE *               fp = pngfp.m_FilePointer;
@@ -556,8 +562,7 @@ PNGImageIO::WriteSlice(const std::string & fileName, const void * const buffer)
                                                             << "Reason: " << itksys::SystemTools::GetLastSystemError());
   }
 
-  int                colorType = 0;
-  const unsigned int numComp = this->GetNumberOfComponents();
+  int colorType = 0;
   switch (numComp)
   {
     case 1:
@@ -576,7 +581,7 @@ PNGImageIO::WriteSlice(const std::string & fileName, const void * const buffer)
     case 3:
       colorType = PNG_COLOR_TYPE_RGB;
       break;
-    default:
+    case 4:
       colorType = PNG_COLOR_TYPE_RGB_ALPHA;
       break;
   }
