@@ -802,11 +802,15 @@ void
 ReadBuffer(std::istream & is, TComponent * buffer, ImageIOBase::SizeType num)
 {
   using PrintType = typename itk::NumericTraits<TComponent>::PrintType;
-  PrintType    temp;
   TComponent * ptr = buffer;
   for (ImageIOBase::SizeType i = 0; i < num; i++, ptr++)
   {
+    PrintType temp{};
     is >> temp;
+    if (is.fail())
+    {
+      itkGenericExceptionMacro("Failed reading ASCII component " << i << " of " << num);
+    }
     *ptr = static_cast<TComponent>(temp);
   }
 }
