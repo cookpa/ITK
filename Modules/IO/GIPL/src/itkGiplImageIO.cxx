@@ -207,35 +207,37 @@ GiplImageIO::Read(void * buffer)
     numberOfPixels *= m_Dimensions[dim];
   }
 
-  auto * p = static_cast<char *>(buffer);
-  bool   success = false;
+  auto *         p = static_cast<char *>(buffer);
+  const SizeType expectedBytes = this->GetImageSizeInBytes();
+  SizeType       bytesRead = 0;
+  bool           success = false;
   if (m_IsCompressed)
   {
     // gzread rejects requests over INT_MAX, so read in chunks and total the byte count in 64 bits.
-    SizeType remaining = this->GetImageSizeInBytes();
-    while (remaining > 0)
+    while (bytesRead < expectedBytes)
     {
-      const auto chunk = static_cast<unsigned int>(std::min(remaining, SizeType{ 1 } << 30));
-      const int  bytesRead = gzread(m_Internal->m_GzFile, p, chunk);
-      if (bytesRead <= 0)
+      const auto chunk = static_cast<unsigned int>(std::min(expectedBytes - bytesRead, SizeType{ 1 } << 30));
+      const int  count = gzread(m_Internal->m_GzFile, p, chunk);
+      if (count <= 0)
       {
         break;
       }
-      p += bytesRead;
-      remaining -= static_cast<SizeType>(bytesRead);
+      p += count;
+      bytesRead += static_cast<SizeType>(count);
     }
-    success = (remaining == 0);
+    success = (bytesRead == expectedBytes);
     gzclose(m_Internal->m_GzFile);
     m_Internal->m_GzFile = nullptr;
   }
   else
   {
-    success = this->ReadBufferAsBinary(m_Ifstream, buffer, this->GetImageSizeInBytes());
+    success = this->ReadBufferAsBinary(m_Ifstream, buffer, expectedBytes);
+    bytesRead = static_cast<SizeType>(std::max(m_Ifstream.gcount(), std::streamsize{ 0 }));
     m_Ifstream.close();
   }
   if (!success)
   {
-    itkExceptionStringMacro("Error reading image data.");
+    itkExceptionMacro("Error reading image data: read " << bytesRead << " of " << expectedBytes << " expected bytes.");
   }
 
   SwapBytesIfNecessary(buffer, numberOfPixels);
