@@ -76,7 +76,7 @@ public:
 
 protected:
   ColormapFunction()
-    : m_MinimumInputValue(NumericTraits<TScalar>::min())
+    : m_MinimumInputValue(NumericTraits<TScalar>::NonpositiveMin())
     , m_MaximumInputValue(NumericTraits<TScalar>::max())
     , m_MinimumRGBComponentValue(NumericTraits<RGBComponentType>::min())
     , m_MaximumRGBComponentValue(NumericTraits<RGBComponentType>::max())

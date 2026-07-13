@@ -211,3 +211,7 @@ itk_add_test(
   ITK_REMOVE_TEMPORARY_TEST_FILES
     ${ITK_TEST_OUTPUT_DIR}/RGBColormapTest_overunder.png
 )
+
+set(ITKColormapGTests itkScalarToRGBColormapImageFilterGTest.cxx)
+
+creategoogletestdriver(ITKColormap "${ITKColormap-Test_LIBRARIES}" "${ITKColormapGTests}")
