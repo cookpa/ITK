@@ -121,6 +121,30 @@ function(itk_add_test)
     set(_iat_testname ${_iat_arg0})
   endif()
 
+  # Duplicate names share the Cleanup_<name> fixture and race under ctest -j.
+  # Remote modules live in separate repositories, so a collision they cause
+  # cannot be fixed in this tree; warn instead of failing the configure.
+  get_property(_iat_dup GLOBAL PROPERTY "ITK_TEST_NAME_${_iat_testname}")
+  if(_iat_dup)
+    if("${CMAKE_CURRENT_LIST_FILE}" MATCHES "/Modules/Remote/")
+      message(
+        AUTHOR_WARNING
+        "Duplicate test name '${_iat_testname}' (already added in ${_iat_dup}); rename it in the remote module."
+      )
+    else()
+      message(
+        FATAL_ERROR
+        "Duplicate test name '${_iat_testname}' (already added in ${_iat_dup})."
+      )
+    endif()
+  endif()
+  set_property(
+    GLOBAL
+    PROPERTY
+      "ITK_TEST_NAME_${_iat_testname}"
+        "${CMAKE_CURRENT_LIST_FILE}"
+  )
+
   if(itk-module)
     set(_label ${itk-module})
     if(TARGET ${itk-module}-all AND "${_iat_args}" MATCHES "DATA{")
