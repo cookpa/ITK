@@ -7,6 +7,10 @@ set(
 
 createtestdriver(ITKCurvatureFlow "${ITKCurvatureFlow-Test_LIBRARIES}" "${ITKCurvatureFlowTests}")
 
+set(ITKCurvatureFlowGTests itkMinMaxCurvatureFlowFunctionGTest.cxx)
+
+creategoogletestdriver(ITKCurvatureFlow "${ITKCurvatureFlow-Test_LIBRARIES}" "${ITKCurvatureFlowGTests}")
+
 itk_add_test(
   NAME itkBinaryMinMaxCurvatureFlowImageFilterTest
   COMMAND
