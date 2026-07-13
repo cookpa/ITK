@@ -121,6 +121,21 @@ NormalizedCorrelationImageFilter<TInputImage, TMaskImage, TOutputImage, TOperato
   //
   const double k = std * std::sqrt(num - 1.0);
 
+  // A zero-variance (constant) template has no defined direction to normalize
+  // toward and correlates to zero everywhere; cancellation in the variance can
+  // round slightly negative, making k NaN, so test !(k > 0).
+  if (!(k > 0.0))
+  {
+    OutputImageType *     zeroOutput = this->GetOutput();
+    TotalProgressReporter zeroProgress(this, zeroOutput->GetRequestedRegion().GetNumberOfPixels());
+    for (ImageRegionIterator<OutputImageType> it(zeroOutput, outputRegionForThread); !it.IsAtEnd(); ++it)
+    {
+      it.Set(OutputPixelType{});
+    }
+    zeroProgress.Completed(outputRegionForThread.GetNumberOfPixels());
+    return;
+  }
+
   // normalize the template
   {
     typename OutputNeighborhoodType::ConstIterator tIt = this->GetOperator().Begin();
@@ -189,7 +204,7 @@ NormalizedCorrelationImageFilter<TInputImage, TMaskImage, TOutputImage, TOperato
         }
         OutputPixelRealType denominator = std::sqrt(sumOfSquares - (sum * sum / realTemplateSize));
 
-        it.Value() = numerator / denominator;
+        it.Value() = (denominator > OutputPixelRealType{}) ? numerator / denominator : zero;
 
         ++bit;
         ++it;
@@ -225,7 +240,7 @@ NormalizedCorrelationImageFilter<TInputImage, TMaskImage, TOutputImage, TOperato
           }
           OutputPixelRealType denominator = std::sqrt(sumOfSquares - (sum * sum / realTemplateSize));
 
-          it.Value() = numerator / denominator;
+          it.Value() = (denominator > OutputPixelRealType{}) ? numerator / denominator : zero;
         }
         else
         {

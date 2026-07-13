@@ -14,6 +14,7 @@ itk_module(
     ITKImageIntensity
     ITKThresholding
   TEST_DEPENDS
+    ITKGoogleTest
     ITKTestKernel
     ITKImageSources
   DESCRIPTION "${DOCUMENTATION}"
