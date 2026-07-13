@@ -18,8 +18,10 @@
 #include "gtest/gtest.h"
 #include "itkGiplImageIO.h"
 #include "itkImage.h"
+#include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 
@@ -28,6 +30,19 @@
 
 namespace
 {
+using ScalarImageType = itk::Image<unsigned char, 2>;
+
+ScalarImageType::Pointer
+MakeScalarImage(unsigned int side)
+{
+  auto                            image = ScalarImageType::New();
+  const ScalarImageType::SizeType size{ { side, side } };
+  image->SetRegions(ScalarImageType::RegionType(size));
+  image->Allocate();
+  image->FillBuffer(42);
+  return image;
+}
+
 std::string
 OutputPath(const std::string & name)
 {
@@ -64,4 +79,30 @@ TEST(GiplImageIO, WriteOfUnsupportedComponentTypePreservesExistingFile)
   std::ostringstream contents;
   contents << in.rdbuf();
   EXPECT_EQ(contents.str(), originalContents);
+}
+
+TEST(GiplImageIO, ReadOfTruncatedUncompressedFileThrows)
+{
+  const std::string path = OutputPath("gipl_b54_truncated.gipl");
+  auto              image = MakeScalarImage(8);
+
+  auto writerIO = itk::GiplImageIO::New();
+  using WriterType = itk::ImageFileWriter<ScalarImageType>;
+  auto writer = WriterType::New();
+  writer->SetImageIO(writerIO);
+  writer->SetInput(image);
+  writer->SetFileName(path);
+  ASSERT_NO_THROW(writer->Update());
+
+  const auto fullSize = std::filesystem::file_size(path);
+  ASSERT_GT(fullSize, 20u);
+  std::filesystem::resize_file(path, fullSize - 10);
+
+  auto readerIO = itk::GiplImageIO::New();
+  using ReaderType = itk::ImageFileReader<ScalarImageType>;
+  auto reader = ReaderType::New();
+  reader->SetImageIO(readerIO);
+  reader->SetFileName(path);
+
+  EXPECT_THROW(reader->Update(), itk::ExceptionObject);
 }

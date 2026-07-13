@@ -207,32 +207,17 @@ GiplImageIO::Read(void * buffer)
   }
 
   auto * p = static_cast<char *>(buffer);
+  bool   success = false;
   if (m_IsCompressed)
   {
     gzread(m_Internal->m_GzFile, p, static_cast<unsigned int>(this->GetImageSizeInBytes()));
-  }
-  else
-  {
-    m_Ifstream.read(p, static_cast<std::streamsize>(this->GetImageSizeInBytes()));
-  }
-
-  bool success = false;
-  if (m_IsCompressed)
-  {
     success = p != nullptr;
-  }
-  else
-  {
-    success = !m_Ifstream.bad();
-  }
-
-  if (m_IsCompressed)
-  {
     gzclose(m_Internal->m_GzFile);
     m_Internal->m_GzFile = nullptr;
   }
   else
   {
+    success = this->ReadBufferAsBinary(m_Ifstream, buffer, this->GetImageSizeInBytes());
     m_Ifstream.close();
   }
   if (!success)
