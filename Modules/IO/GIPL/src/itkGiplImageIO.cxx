@@ -199,12 +199,12 @@ GiplImageIO::CanWriteFile(const char * name)
 void
 GiplImageIO::Read(void * buffer)
 {
-  const uint32_t dimensions = this->GetNumberOfDimensions();
-  uint32_t       numberOfPixels = 1;
+  const unsigned int dimensions = this->GetNumberOfDimensions();
+  SizeValueType      numberOfPixels = 1;
 
   for (unsigned int dim = 0; dim < dimensions; ++dim)
   {
-    numberOfPixels *= static_cast<uint32_t>(m_Dimensions[dim]);
+    numberOfPixels *= m_Dimensions[dim];
   }
 
   auto * p = static_cast<char *>(buffer);
