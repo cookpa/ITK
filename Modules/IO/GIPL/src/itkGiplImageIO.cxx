@@ -662,6 +662,12 @@ GiplImageIO::Write(const void * buffer)
 {
   CheckExtension(m_FileName.c_str());
 
+  if (this->GetNumberOfComponents() != 1)
+  {
+    itkExceptionMacro("GIPL format cannot store multi-component pixels: " << this->GetNumberOfComponents()
+                                                                          << " components.");
+  }
+
   unsigned short image_type = 0;
   switch (m_ComponentType)
   {

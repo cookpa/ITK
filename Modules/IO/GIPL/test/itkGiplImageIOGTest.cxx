@@ -20,6 +20,7 @@
 #include "itkImage.h"
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
+#include "itkVector.h"
 
 #include <filesystem>
 #include <fstream>
@@ -131,4 +132,27 @@ TEST(GiplImageIO, ReadOfTruncatedCompressedFileThrows)
   reader->SetFileName(path);
 
   EXPECT_THROW(reader->Update(), itk::ExceptionObject);
+}
+
+TEST(GiplImageIO, WriteOfMultiComponentImageThrows)
+{
+  using VectorPixelType = itk::Vector<float, 3>;
+  using VectorImageType = itk::Image<VectorPixelType, 2>;
+
+  auto                            image = VectorImageType::New();
+  const VectorImageType::SizeType size{ { 4, 4 } };
+  image->SetRegions(VectorImageType::RegionType(size));
+  image->Allocate();
+  image->FillBuffer(VectorPixelType({ 1.0f, 2.0f, 3.0f }));
+
+  const std::string path = OutputPath("gipl_b56_vector.gipl");
+
+  auto giplIO = itk::GiplImageIO::New();
+  using WriterType = itk::ImageFileWriter<VectorImageType>;
+  auto writer = WriterType::New();
+  writer->SetImageIO(giplIO);
+  writer->SetInput(image);
+  writer->SetFileName(path);
+
+  EXPECT_THROW(writer->Update(), itk::ExceptionObject);
 }
