@@ -664,6 +664,31 @@ GiplImageIO::Write(const void * buffer)
 {
   CheckExtension(m_FileName.c_str());
 
+  unsigned short image_type = 0;
+  switch (m_ComponentType)
+  {
+    case IOComponentEnum::SCHAR:
+      image_type = GIPL_CHAR;
+      break;
+    case IOComponentEnum::UCHAR:
+      image_type = GIPL_U_CHAR;
+      break;
+    case IOComponentEnum::SHORT:
+      image_type = GIPL_SHORT;
+      break;
+    case IOComponentEnum::USHORT:
+      image_type = GIPL_U_SHORT;
+      break;
+    case IOComponentEnum::FLOAT:
+      image_type = GIPL_FLOAT;
+      break;
+    case IOComponentEnum::DOUBLE:
+      image_type = GIPL_DOUBLE;
+      break;
+    default:
+      itkExceptionMacro("Invalid type: " << m_ComponentType);
+  }
+
   const unsigned int nDims = this->GetNumberOfDimensions();
 
   if (m_IsCompressed)
@@ -727,37 +752,6 @@ GiplImageIO::Write(const void * buffer)
         m_Ofstream.write(reinterpret_cast<char *>(&value), sizeof(unsigned short));
       }
     }
-  }
-
-  unsigned short image_type = 0;
-  switch (m_ComponentType)
-  {
-    case IOComponentEnum::SCHAR:
-      image_type = GIPL_CHAR;
-      break;
-    case IOComponentEnum::UCHAR:
-      image_type = GIPL_U_CHAR;
-      break;
-    case IOComponentEnum::SHORT:
-      image_type = GIPL_SHORT;
-      break;
-    case IOComponentEnum::USHORT:
-      image_type = GIPL_U_SHORT;
-      break;
-    case IOComponentEnum::UINT:
-      image_type = GIPL_U_INT;
-      break;
-    case IOComponentEnum::INT:
-      image_type = GIPL_INT;
-      break;
-    case IOComponentEnum::FLOAT:
-      image_type = GIPL_FLOAT;
-      break;
-    case IOComponentEnum::DOUBLE:
-      image_type = GIPL_DOUBLE;
-      break;
-    default:
-      itkExceptionMacro("Invalid type: " << m_ComponentType);
   }
 
   if (m_ByteOrder == IOByteOrderEnum::BigEndian)

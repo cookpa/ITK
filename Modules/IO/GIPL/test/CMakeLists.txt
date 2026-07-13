@@ -39,3 +39,11 @@ itk_add_test(
   ITK_REMOVE_TEMPORARY_TEST_FILES
     ${ITK_TEST_OUTPUT_DIR}/ramp.gipl
 )
+
+set(ITKIOGIPLGTests itkGiplImageIOGTest.cxx)
+creategoogletestdriver(ITKIOGIPL "${ITKIOGIPL-Test_LIBRARIES}" "${ITKIOGIPLGTests}")
+target_compile_definitions(
+  ITKIOGIPLGTestDriver
+  PRIVATE
+    "ITK_TEST_OUTPUT_DIR=${ITK_TEST_OUTPUT_DIR}"
+)
