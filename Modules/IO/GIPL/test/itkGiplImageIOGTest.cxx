@@ -106,3 +106,29 @@ TEST(GiplImageIO, ReadOfTruncatedUncompressedFileThrows)
 
   EXPECT_THROW(reader->Update(), itk::ExceptionObject);
 }
+
+TEST(GiplImageIO, ReadOfTruncatedCompressedFileThrows)
+{
+  const std::string path = OutputPath("gipl_b55_truncated.gipl.gz");
+  auto              image = MakeScalarImage(8);
+
+  auto writerIO = itk::GiplImageIO::New();
+  using WriterType = itk::ImageFileWriter<ScalarImageType>;
+  auto writer = WriterType::New();
+  writer->SetImageIO(writerIO);
+  writer->SetInput(image);
+  writer->SetFileName(path);
+  ASSERT_NO_THROW(writer->Update());
+
+  const auto fullSize = std::filesystem::file_size(path);
+  ASSERT_GT(fullSize, 20u);
+  std::filesystem::resize_file(path, fullSize / 2);
+
+  auto readerIO = itk::GiplImageIO::New();
+  using ReaderType = itk::ImageFileReader<ScalarImageType>;
+  auto reader = ReaderType::New();
+  reader->SetImageIO(readerIO);
+  reader->SetFileName(path);
+
+  EXPECT_THROW(reader->Update(), itk::ExceptionObject);
+}

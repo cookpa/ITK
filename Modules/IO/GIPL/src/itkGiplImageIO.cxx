@@ -18,6 +18,7 @@
 #include "itkGiplImageIO.h"
 #include "itkByteSwapper.h"
 #include "itkMakeUniqueForOverwrite.h"
+#include <algorithm>
 #include <iostream>
 #include "itk_zlib.h"
 
@@ -210,8 +211,20 @@ GiplImageIO::Read(void * buffer)
   bool   success = false;
   if (m_IsCompressed)
   {
-    gzread(m_Internal->m_GzFile, p, static_cast<unsigned int>(this->GetImageSizeInBytes()));
-    success = p != nullptr;
+    // gzread rejects requests over INT_MAX, so read in chunks and total the byte count in 64 bits.
+    SizeType remaining = this->GetImageSizeInBytes();
+    while (remaining > 0)
+    {
+      const auto chunk = static_cast<unsigned int>(std::min(remaining, SizeType{ 1 } << 30));
+      const int  bytesRead = gzread(m_Internal->m_GzFile, p, chunk);
+      if (bytesRead <= 0)
+      {
+        break;
+      }
+      p += bytesRead;
+      remaining -= static_cast<SizeType>(bytesRead);
+    }
+    success = (remaining == 0);
     gzclose(m_Internal->m_GzFile);
     m_Internal->m_GzFile = nullptr;
   }
