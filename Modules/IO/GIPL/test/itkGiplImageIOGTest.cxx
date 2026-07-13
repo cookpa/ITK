@@ -22,6 +22,7 @@
 #include "itkImageFileWriter.h"
 #include "itkVector.h"
 
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -49,6 +50,50 @@ OutputPath(const std::string & name)
 {
   return TOSTRING(ITK_TEST_OUTPUT_DIR) + "/" + name;
 }
+
+template <typename TImage>
+void
+WriteWithGiplIO(TImage * image, const std::string & path)
+{
+  auto writer = itk::ImageFileWriter<TImage>::New();
+  writer->SetImageIO(itk::GiplImageIO::New());
+  writer->SetInput(image);
+  writer->SetFileName(path);
+  ASSERT_NO_THROW(writer->Update());
+}
+
+template <typename TImage>
+void
+ExpectWriteThrows(TImage * image, const std::string & path)
+{
+  auto writer = itk::ImageFileWriter<TImage>::New();
+  writer->SetImageIO(itk::GiplImageIO::New());
+  writer->SetInput(image);
+  writer->SetFileName(path);
+  EXPECT_THROW(writer->Update(), itk::ExceptionObject);
+}
+
+template <typename TImage>
+typename TImage::Pointer
+ReadWithGiplIO(const std::string & path)
+{
+  auto reader = itk::ImageFileReader<TImage>::New();
+  reader->SetImageIO(itk::GiplImageIO::New());
+  reader->SetFileName(path);
+  EXPECT_NO_THROW(reader->Update());
+  return reader->GetOutput();
+}
+
+void
+ExpectTruncatedReadThrows(const std::string & path, const std::uintmax_t truncatedSize)
+{
+  std::filesystem::resize_file(path, truncatedSize);
+
+  auto reader = itk::ImageFileReader<ScalarImageType>::New();
+  reader->SetImageIO(itk::GiplImageIO::New());
+  reader->SetFileName(path);
+  EXPECT_THROW(reader->Update(), itk::ExceptionObject);
+}
 } // namespace
 
 TEST(GiplImageIO, WriteOfUnsupportedComponentTypePreservesExistingFile)
@@ -67,14 +112,7 @@ TEST(GiplImageIO, WriteOfUnsupportedComponentTypePreservesExistingFile)
   image->Allocate();
   image->FillBuffer(7);
 
-  auto giplIO = itk::GiplImageIO::New();
-  using WriterType = itk::ImageFileWriter<UnsupportedImageType>;
-  auto writer = WriterType::New();
-  writer->SetImageIO(giplIO);
-  writer->SetInput(image);
-  writer->SetFileName(path);
-
-  EXPECT_THROW(writer->Update(), itk::ExceptionObject);
+  ExpectWriteThrows(image.GetPointer(), path);
 
   std::ifstream      in(path, std::ios::binary);
   std::ostringstream contents;
@@ -85,53 +123,21 @@ TEST(GiplImageIO, WriteOfUnsupportedComponentTypePreservesExistingFile)
 TEST(GiplImageIO, ReadOfTruncatedUncompressedFileThrows)
 {
   const std::string path = OutputPath("gipl_b54_truncated.gipl");
-  auto              image = MakeScalarImage(8);
-
-  auto writerIO = itk::GiplImageIO::New();
-  using WriterType = itk::ImageFileWriter<ScalarImageType>;
-  auto writer = WriterType::New();
-  writer->SetImageIO(writerIO);
-  writer->SetInput(image);
-  writer->SetFileName(path);
-  ASSERT_NO_THROW(writer->Update());
+  WriteWithGiplIO(MakeScalarImage(8).GetPointer(), path);
 
   const auto fullSize = std::filesystem::file_size(path);
   ASSERT_GT(fullSize, 20u);
-  std::filesystem::resize_file(path, fullSize - 10);
-
-  auto readerIO = itk::GiplImageIO::New();
-  using ReaderType = itk::ImageFileReader<ScalarImageType>;
-  auto reader = ReaderType::New();
-  reader->SetImageIO(readerIO);
-  reader->SetFileName(path);
-
-  EXPECT_THROW(reader->Update(), itk::ExceptionObject);
+  ExpectTruncatedReadThrows(path, fullSize - 10);
 }
 
 TEST(GiplImageIO, ReadOfTruncatedCompressedFileThrows)
 {
   const std::string path = OutputPath("gipl_b55_truncated.gipl.gz");
-  auto              image = MakeScalarImage(8);
-
-  auto writerIO = itk::GiplImageIO::New();
-  using WriterType = itk::ImageFileWriter<ScalarImageType>;
-  auto writer = WriterType::New();
-  writer->SetImageIO(writerIO);
-  writer->SetInput(image);
-  writer->SetFileName(path);
-  ASSERT_NO_THROW(writer->Update());
+  WriteWithGiplIO(MakeScalarImage(8).GetPointer(), path);
 
   const auto fullSize = std::filesystem::file_size(path);
   ASSERT_GT(fullSize, 20u);
-  std::filesystem::resize_file(path, fullSize / 2);
-
-  auto readerIO = itk::GiplImageIO::New();
-  using ReaderType = itk::ImageFileReader<ScalarImageType>;
-  auto reader = ReaderType::New();
-  reader->SetImageIO(readerIO);
-  reader->SetFileName(path);
-
-  EXPECT_THROW(reader->Update(), itk::ExceptionObject);
+  ExpectTruncatedReadThrows(path, fullSize / 2);
 }
 
 TEST(GiplImageIO, WriteOfMultiComponentImageThrows)
@@ -145,16 +151,7 @@ TEST(GiplImageIO, WriteOfMultiComponentImageThrows)
   image->Allocate();
   image->FillBuffer(VectorPixelType({ 1.0f, 2.0f, 3.0f }));
 
-  const std::string path = OutputPath("gipl_b56_vector.gipl");
-
-  auto giplIO = itk::GiplImageIO::New();
-  using WriterType = itk::ImageFileWriter<VectorImageType>;
-  auto writer = WriterType::New();
-  writer->SetImageIO(giplIO);
-  writer->SetInput(image);
-  writer->SetFileName(path);
-
-  EXPECT_THROW(writer->Update(), itk::ExceptionObject);
+  ExpectWriteThrows(image.GetPointer(), OutputPath("gipl_b56_vector.gipl"));
 }
 
 TEST(GiplImageIO, RoundTripsIntAndUnsignedIntComponentTypes)
@@ -178,32 +175,16 @@ TEST(GiplImageIO, RoundTripsIntAndUnsignedIntComponentTypes)
   const std::string intPath = OutputPath("gipl_enh_int.gipl");
   const std::string uintPath = OutputPath("gipl_enh_uint.gipl");
 
-  auto intWriter = itk::ImageFileWriter<IntImageType>::New();
-  intWriter->SetImageIO(itk::GiplImageIO::New());
-  intWriter->SetInput(intImage);
-  intWriter->SetFileName(intPath);
-  ASSERT_NO_THROW(intWriter->Update());
+  WriteWithGiplIO(intImage.GetPointer(), intPath);
+  WriteWithGiplIO(uintImage.GetPointer(), uintPath);
 
-  auto uintWriter = itk::ImageFileWriter<UIntImageType>::New();
-  uintWriter->SetImageIO(itk::GiplImageIO::New());
-  uintWriter->SetInput(uintImage);
-  uintWriter->SetFileName(uintPath);
-  ASSERT_NO_THROW(uintWriter->Update());
-
-  auto intReader = itk::ImageFileReader<IntImageType>::New();
-  intReader->SetImageIO(itk::GiplImageIO::New());
-  intReader->SetFileName(intPath);
-  ASSERT_NO_THROW(intReader->Update());
-
-  auto uintReader = itk::ImageFileReader<UIntImageType>::New();
-  uintReader->SetImageIO(itk::GiplImageIO::New());
-  uintReader->SetFileName(uintPath);
-  ASSERT_NO_THROW(uintReader->Update());
+  const auto intRead = ReadWithGiplIO<IntImageType>(intPath);
+  const auto uintRead = ReadWithGiplIO<UIntImageType>(uintPath);
 
   const auto numberOfPixels = intImage->GetPixelContainer()->Size();
   for (unsigned int i = 0; i < numberOfPixels; ++i)
   {
-    EXPECT_EQ(intImage->GetBufferPointer()[i], intReader->GetOutput()->GetBufferPointer()[i]);
-    EXPECT_EQ(uintImage->GetBufferPointer()[i], uintReader->GetOutput()->GetBufferPointer()[i]);
+    EXPECT_EQ(intImage->GetBufferPointer()[i], intRead->GetBufferPointer()[i]);
+    EXPECT_EQ(uintImage->GetBufferPointer()[i], uintRead->GetBufferPointer()[i]);
   }
 }
