@@ -582,6 +582,23 @@ GiplImageIO::ReadImageInformation()
   }
 }
 
+namespace
+{
+template <typename TComponent>
+void
+SwapRange(void * buffer, SizeValueType numberOfPixels, IOByteOrderEnum byteOrder)
+{
+  if (byteOrder == IOByteOrderEnum::LittleEndian)
+  {
+    ByteSwapper<TComponent>::SwapRangeFromSystemToLittleEndian(static_cast<TComponent *>(buffer), numberOfPixels);
+  }
+  else if (byteOrder == IOByteOrderEnum::BigEndian)
+  {
+    ByteSwapper<TComponent>::SwapRangeFromSystemToBigEndian(static_cast<TComponent *>(buffer), numberOfPixels);
+  }
+}
+} // namespace
+
 void
 GiplImageIO::SwapBytesIfNecessary(void * buffer, SizeValueType numberOfPixels)
 {
@@ -589,85 +606,26 @@ GiplImageIO::SwapBytesIfNecessary(void * buffer, SizeValueType numberOfPixels)
   {
     case IOComponentEnum::SCHAR:
     case IOComponentEnum::UCHAR:
-    {
-      // For CHAR and UCHAR, it is not necessary to swap bytes.
+      // Single-byte components need no swapping.
       break;
-    }
     case IOComponentEnum::SHORT:
-    {
-      if (m_ByteOrder == IOByteOrderEnum::LittleEndian)
-      {
-        ByteSwapper<short>::SwapRangeFromSystemToLittleEndian(static_cast<short *>(buffer), numberOfPixels);
-      }
-      else if (m_ByteOrder == IOByteOrderEnum::BigEndian)
-      {
-        ByteSwapper<short>::SwapRangeFromSystemToBigEndian(static_cast<short *>(buffer), numberOfPixels);
-      }
+      SwapRange<short>(buffer, numberOfPixels, m_ByteOrder);
       break;
-    }
     case IOComponentEnum::USHORT:
-    {
-      if (m_ByteOrder == IOByteOrderEnum::LittleEndian)
-      {
-        ByteSwapper<unsigned short>::SwapRangeFromSystemToLittleEndian(static_cast<unsigned short *>(buffer),
-                                                                       numberOfPixels);
-      }
-      else if (m_ByteOrder == IOByteOrderEnum::BigEndian)
-      {
-        ByteSwapper<unsigned short>::SwapRangeFromSystemToBigEndian(static_cast<unsigned short *>(buffer),
-                                                                    numberOfPixels);
-      }
+      SwapRange<unsigned short>(buffer, numberOfPixels, m_ByteOrder);
       break;
-    }
     case IOComponentEnum::INT:
-    {
-      if (m_ByteOrder == IOByteOrderEnum::LittleEndian)
-      {
-        ByteSwapper<int>::SwapRangeFromSystemToLittleEndian(static_cast<int *>(buffer), numberOfPixels);
-      }
-      else if (m_ByteOrder == IOByteOrderEnum::BigEndian)
-      {
-        ByteSwapper<int>::SwapRangeFromSystemToBigEndian(static_cast<int *>(buffer), numberOfPixels);
-      }
+      SwapRange<int>(buffer, numberOfPixels, m_ByteOrder);
       break;
-    }
     case IOComponentEnum::UINT:
-    {
-      if (m_ByteOrder == IOByteOrderEnum::LittleEndian)
-      {
-        ByteSwapper<unsigned int>::SwapRangeFromSystemToLittleEndian(static_cast<unsigned int *>(buffer),
-                                                                     numberOfPixels);
-      }
-      else if (m_ByteOrder == IOByteOrderEnum::BigEndian)
-      {
-        ByteSwapper<unsigned int>::SwapRangeFromSystemToBigEndian(static_cast<unsigned int *>(buffer), numberOfPixels);
-      }
+      SwapRange<unsigned int>(buffer, numberOfPixels, m_ByteOrder);
       break;
-    }
     case IOComponentEnum::FLOAT:
-    {
-      if (m_ByteOrder == IOByteOrderEnum::LittleEndian)
-      {
-        ByteSwapper<float>::SwapRangeFromSystemToLittleEndian(static_cast<float *>(buffer), numberOfPixels);
-      }
-      else if (m_ByteOrder == IOByteOrderEnum::BigEndian)
-      {
-        ByteSwapper<float>::SwapRangeFromSystemToBigEndian(static_cast<float *>(buffer), numberOfPixels);
-      }
+      SwapRange<float>(buffer, numberOfPixels, m_ByteOrder);
       break;
-    }
     case IOComponentEnum::DOUBLE:
-    {
-      if (m_ByteOrder == IOByteOrderEnum::LittleEndian)
-      {
-        ByteSwapper<double>::SwapRangeFromSystemToLittleEndian(static_cast<double *>(buffer), numberOfPixels);
-      }
-      else if (m_ByteOrder == IOByteOrderEnum::BigEndian)
-      {
-        ByteSwapper<double>::SwapRangeFromSystemToBigEndian(static_cast<double *>(buffer), numberOfPixels);
-      }
+      SwapRange<double>(buffer, numberOfPixels, m_ByteOrder);
       break;
-    }
     default:
       ExceptionObject exception(__FILE__, __LINE__);
       exception.SetDescription("Pixel Type Unknown");
