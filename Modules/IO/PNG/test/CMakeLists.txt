@@ -224,3 +224,12 @@ itk_add_test(
     itkPNGImageIOTest3
     DATA{Input/corrupted.png}
 )
+
+set(ITKIOPNGGTests itkPNGImageIOGTest.cxx)
+creategoogletestdriver(ITKIOPNG "${ITKIOPNG-Test_LIBRARIES}" "${ITKIOPNGGTests}")
+
+target_compile_definitions(
+  ITKIOPNGGTestDriver
+  PRIVATE
+    "-DITK_TEST_OUTPUT_DIR=${ITK_TEST_OUTPUT_DIR}"
+)

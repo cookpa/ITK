@@ -510,23 +510,6 @@ PNGImageIO::Write(const void * buffer)
 void
 PNGImageIO::WriteSlice(const std::string & fileName, const void * const buffer)
 {
-  // use this class so return will call close
-  const PNGFileWrapper pngfp(fileName.c_str(), "wb");
-  FILE *               fp = pngfp.m_FilePointer;
-
-  if (!fp)
-  {
-    // IMPORTANT: The itkExceptionMacro() cannot be used here due to a bug in
-    // Visual
-    //            Studio 7.1 in release mode. That compiler will corrupt the
-    // RTTI type
-    //            of the Exception and prevent the catch() from recognizing it.
-    //            For details, see Bug #1872 in the bugtracker.
-
-    itk::ExceptionObject excp(__FILE__, __LINE__, "Problem while opening the file.", ITK_LOCATION);
-    throw excp;
-  }
-
   volatile int bitDepth = 0;
   switch (this->GetComponentType())
   {
@@ -539,17 +522,22 @@ PNGImageIO::WriteSlice(const std::string & fileName, const void * const buffer)
       break;
 
     default:
-    {
-      // IMPORTANT: The itkExceptionMacro() cannot be used here due to a bug in
-      // Visual
-      //            Studio 7.1 in release mode. That compiler will corrupt the
-      // RTTI type
-      //            of the Exception and prevent the catch() from recognizing
-      // it.
-      //            For details, see Bug #1872 in the bugtracker.
-      itk::ExceptionObject excp(__FILE__, __LINE__, "PNG supports unsigned char and unsigned short", ITK_LOCATION);
-      throw excp;
-    }
+      itkExceptionMacro("PNG supports unsigned char and unsigned short");
+  }
+
+  const unsigned int numComp = this->GetNumberOfComponents();
+  if (numComp < 1 || numComp > 4)
+  {
+    itkExceptionMacro("PNG supports 1 to 4 components per pixel");
+  }
+
+  // use this class so return will call close
+  const PNGFileWrapper pngfp(fileName.c_str(), "wb");
+  FILE *               fp = pngfp.m_FilePointer;
+
+  if (!fp)
+  {
+    itkExceptionMacro("Problem while opening the file.");
   }
 
   png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, (png_voidp) nullptr, nullptr, nullptr);
@@ -574,8 +562,7 @@ PNGImageIO::WriteSlice(const std::string & fileName, const void * const buffer)
                                                             << "Reason: " << itksys::SystemTools::GetLastSystemError());
   }
 
-  int                colorType = 0;
-  const unsigned int numComp = this->GetNumberOfComponents();
+  int colorType = 0;
   switch (numComp)
   {
     case 1:
@@ -594,7 +581,7 @@ PNGImageIO::WriteSlice(const std::string & fileName, const void * const buffer)
     case 3:
       colorType = PNG_COLOR_TYPE_RGB;
       break;
-    default:
+    case 4:
       colorType = PNG_COLOR_TYPE_RGB_ALPHA;
       break;
   }

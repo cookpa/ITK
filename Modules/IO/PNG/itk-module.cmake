@@ -12,6 +12,7 @@ itk_module(
   PRIVATE_DEPENDS
     ITKPNG
   TEST_DEPENDS
+    ITKGoogleTest
     ITKTestKernel
   FACTORY_NAMES
     ImageIO::PNG
