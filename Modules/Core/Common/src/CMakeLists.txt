@@ -95,6 +95,7 @@ set(
   itkLoggerOutput.cxx
   itkLoggerThreadWrapper.cxx
   itkLogOutput.cxx
+  itkMathSVD.cxx
   itkMemoryProbe.cxx
   itkMemoryProbesCollectorBase.cxx
   itkMemoryUsageObserver.cxx
