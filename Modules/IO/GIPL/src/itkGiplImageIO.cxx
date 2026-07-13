@@ -619,6 +619,31 @@ GiplImageIO::SwapBytesIfNecessary(void * buffer, SizeValueType numberOfPixels)
       }
       break;
     }
+    case IOComponentEnum::INT:
+    {
+      if (m_ByteOrder == IOByteOrderEnum::LittleEndian)
+      {
+        ByteSwapper<int>::SwapRangeFromSystemToLittleEndian(static_cast<int *>(buffer), numberOfPixels);
+      }
+      else if (m_ByteOrder == IOByteOrderEnum::BigEndian)
+      {
+        ByteSwapper<int>::SwapRangeFromSystemToBigEndian(static_cast<int *>(buffer), numberOfPixels);
+      }
+      break;
+    }
+    case IOComponentEnum::UINT:
+    {
+      if (m_ByteOrder == IOByteOrderEnum::LittleEndian)
+      {
+        ByteSwapper<unsigned int>::SwapRangeFromSystemToLittleEndian(static_cast<unsigned int *>(buffer),
+                                                                     numberOfPixels);
+      }
+      else if (m_ByteOrder == IOByteOrderEnum::BigEndian)
+      {
+        ByteSwapper<unsigned int>::SwapRangeFromSystemToBigEndian(static_cast<unsigned int *>(buffer), numberOfPixels);
+      }
+      break;
+    }
     case IOComponentEnum::FLOAT:
     {
       if (m_ByteOrder == IOByteOrderEnum::LittleEndian)
@@ -682,6 +707,12 @@ GiplImageIO::Write(const void * buffer)
       break;
     case IOComponentEnum::USHORT:
       image_type = GIPL_U_SHORT;
+      break;
+    case IOComponentEnum::UINT:
+      image_type = GIPL_U_INT;
+      break;
+    case IOComponentEnum::INT:
+      image_type = GIPL_INT;
       break;
     case IOComponentEnum::FLOAT:
       image_type = GIPL_FLOAT;

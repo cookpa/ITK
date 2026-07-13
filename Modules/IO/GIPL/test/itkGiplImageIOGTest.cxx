@@ -156,3 +156,54 @@ TEST(GiplImageIO, WriteOfMultiComponentImageThrows)
 
   EXPECT_THROW(writer->Update(), itk::ExceptionObject);
 }
+
+TEST(GiplImageIO, RoundTripsIntAndUnsignedIntComponentTypes)
+{
+  using IntImageType = itk::Image<int, 2>;
+  using UIntImageType = itk::Image<unsigned int, 2>;
+  const IntImageType::SizeType size{ { 3, 3 } };
+
+  auto intImage = IntImageType::New();
+  intImage->SetRegions(IntImageType::RegionType(size));
+  intImage->Allocate();
+  intImage->FillBuffer(-70000);
+  intImage->GetBufferPointer()[1] = 123456;
+
+  auto uintImage = UIntImageType::New();
+  uintImage->SetRegions(UIntImageType::RegionType(size));
+  uintImage->Allocate();
+  uintImage->FillBuffer(3000000000u);
+  uintImage->GetBufferPointer()[1] = 654321u;
+
+  const std::string intPath = OutputPath("gipl_enh_int.gipl");
+  const std::string uintPath = OutputPath("gipl_enh_uint.gipl");
+
+  auto intWriter = itk::ImageFileWriter<IntImageType>::New();
+  intWriter->SetImageIO(itk::GiplImageIO::New());
+  intWriter->SetInput(intImage);
+  intWriter->SetFileName(intPath);
+  ASSERT_NO_THROW(intWriter->Update());
+
+  auto uintWriter = itk::ImageFileWriter<UIntImageType>::New();
+  uintWriter->SetImageIO(itk::GiplImageIO::New());
+  uintWriter->SetInput(uintImage);
+  uintWriter->SetFileName(uintPath);
+  ASSERT_NO_THROW(uintWriter->Update());
+
+  auto intReader = itk::ImageFileReader<IntImageType>::New();
+  intReader->SetImageIO(itk::GiplImageIO::New());
+  intReader->SetFileName(intPath);
+  ASSERT_NO_THROW(intReader->Update());
+
+  auto uintReader = itk::ImageFileReader<UIntImageType>::New();
+  uintReader->SetImageIO(itk::GiplImageIO::New());
+  uintReader->SetFileName(uintPath);
+  ASSERT_NO_THROW(uintReader->Update());
+
+  const auto numberOfPixels = intImage->GetPixelContainer()->Size();
+  for (unsigned int i = 0; i < numberOfPixels; ++i)
+  {
+    EXPECT_EQ(intImage->GetBufferPointer()[i], intReader->GetOutput()->GetBufferPointer()[i]);
+    EXPECT_EQ(uintImage->GetBufferPointer()[i], uintReader->GetOutput()->GetBufferPointer()[i]);
+  }
+}
