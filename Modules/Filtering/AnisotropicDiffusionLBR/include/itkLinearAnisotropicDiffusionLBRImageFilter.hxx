@@ -39,9 +39,7 @@ template <typename TImage, typename TScalar>
 LinearAnisotropicDiffusionLBRImageFilter<TImage, TScalar>::LinearAnisotropicDiffusionLBRImageFilter()
   : m_DiffusionTime(1)
   , m_RatioToMaxStableTimeStep(0.7)
-  ,
-
-  m_EffectiveDiffusionTime(0)
+  , m_EffectiveDiffusionTime(0)
 {
   this->SetNumberOfRequiredInputs(2);
 }
