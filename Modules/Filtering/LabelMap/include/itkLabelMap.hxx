@@ -414,6 +414,7 @@ LabelMap<TLabelObject>::PushLabelObject(LabelObjectType * labelObject)
       // search for an unused label
       LabelType                         label = firstLabel;
       LabelObjectContainerConstIterator it;
+      bool                              foundFreeLabel = false;
       for (it = m_LabelObjectContainer.begin(); it != m_LabelObjectContainer.end(); ++it, ++label)
       {
         assert((it->second.IsNotNull()));
@@ -424,10 +425,11 @@ LabelMap<TLabelObject>::PushLabelObject(LabelObjectType * labelObject)
         if (label != it->first)
         {
           labelObject->SetLabel(label);
+          foundFreeLabel = true;
           break;
         }
       }
-      if (label == lastLabel)
+      if (!foundFreeLabel)
       {
         itkExceptionStringMacro("Can't push the label object: the label map is full.");
       }

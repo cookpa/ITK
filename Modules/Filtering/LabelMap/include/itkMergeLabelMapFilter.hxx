@@ -71,12 +71,12 @@ MergeLabelMapFilter<TImage>::MergeWithKeep()
   ImageType * output = this->GetOutput();
 
   using VectorType = std::deque<LabelObjectPointer>;
-  VectorType labelObjects;
 
   ProgressReporter progress(this, 0, 1);
 
   for (unsigned int i = 1; i < this->GetNumberOfIndexedInputs(); ++i)
   {
+    VectorType                        labelObjects;
     typename ImageType::ConstIterator it2(this->GetInput(i));
     while (!it2.IsAtEnd())
     {

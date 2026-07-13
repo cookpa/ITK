@@ -1796,6 +1796,7 @@ itk_add_test(
 set(
   ITKLabelMapGTests
   itkShapeLabelMapFilterGTest.cxx
+  itkLabelMapBugfixGTest.cxx
   itkStatisticsLabelMapFilterGTest.cxx
   itkUniqueLabelMapFiltersGTest.cxx
 )
