@@ -28,9 +28,7 @@ template <unsigned int VImageDimension>
 RieszRotationMatrix<VImageDimension>::RieszRotationMatrix()
   : Superclass()
   , m_SpatialRotationMatrix()
-  ,
-
-  m_MaxAbsoluteDifferenceCloseToZero(1 * itk::NumericTraits<RealType>::epsilon())
+  , m_MaxAbsoluteDifferenceCloseToZero(1 * itk::NumericTraits<RealType>::epsilon())
 {}
 
 template <unsigned int VImageDimension>
