@@ -103,7 +103,7 @@ ThresholdMaximumConnectedComponentsImageFilter<TInputImage, TOutputImage>::Gener
   m_ThresholdFilter->SetInsideValue(m_InsideValue);
   m_ThresholdFilter->SetUpperThreshold(m_UpperBoundary);
 
-  PixelType midpoint = (upperBound - lowerBound) / 2;
+  PixelType midpoint = lowerBound + (upperBound - lowerBound) / 2;
   PixelType midpointL = (lowerBound + (midpoint - lowerBound) / 2);
   PixelType midpointR = (upperBound - (upperBound - midpoint) / 2);
 

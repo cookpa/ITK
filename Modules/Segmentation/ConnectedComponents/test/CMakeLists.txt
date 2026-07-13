@@ -204,6 +204,7 @@ set(
   ITKConnectedComponentsGTests
   itkConnectedComponentImageFilterGTest.cxx
   itkRelabelComponentImageFilterGTest.cxx
+  itkThresholdMaximumConnectedComponentsImageFilterGTest.cxx
 )
 creategoogletestdriver(ITKConnectedComponents "${ITKConnectedComponents-Test_LIBRARIES}"
                        "${ITKConnectedComponentsGTests}"
