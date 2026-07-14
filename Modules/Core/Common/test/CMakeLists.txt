@@ -995,7 +995,7 @@ itk_add_test(
     itkTimeProbeTest
 )
 itk_add_test(
-  NAME itkTimeProbeTest2
+  NAME itkTimeProbeCommonTest2
   COMMAND
     ITKCommon1TestDriver
     itkTimeProbeTest2

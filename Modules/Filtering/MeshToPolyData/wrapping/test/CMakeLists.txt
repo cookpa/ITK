@@ -23,7 +23,7 @@ execute_process(
 if(_have_numpy_return_code EQUAL 0)
   itk_python_add_test(NAME itkPolyLineCellTest COMMAND itkPolyLineCellTest.py)
   itk_python_add_test(
-    NAME itkPyVectorContainerTest
+    NAME itkMeshToPolyDataPyVectorContainerTest
     COMMAND
       ${CMAKE_CURRENT_SOURCE_DIR}/itkPyVectorContainerTest.py
   )

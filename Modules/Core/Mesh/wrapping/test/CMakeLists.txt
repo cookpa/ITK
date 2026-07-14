@@ -24,14 +24,6 @@ if(ITK_WRAP_PYTHON)
     EXPRESSION "instance = itk.MeshFileWriter.New()"
   )
   itk_python_expression_add_test(
-    NAME itkOBJMeshIOPythonTest
-    EXPRESSION "instance = itk.OBJMeshIO.New()"
-  )
-  itk_python_expression_add_test(
-    NAME itkOFFMeshIOPythonTest
-    EXPRESSION "instance = itk.OFFMeshIO.New()"
-  )
-  itk_python_expression_add_test(
     NAME itkVTKPolyDataMeshIOPythonTest
     EXPRESSION "instance = itk.VTKPolyDataMeshIO.New()"
   )
