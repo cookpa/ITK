@@ -170,11 +170,14 @@ public:
     // minus the power spectral density of the noise.
     TPixel Pf = std::norm(I);
 
-    TPixel denominator = std::norm(H) + (Pn / (Pf - Pn));
     TPixel value{};
-    if (itk::Math::Absolute(denominator) >= m_KernelZeroMagnitudeThreshold)
+    if (Pf != Pn)
     {
-      value = I * (std::conj(H) / denominator);
+      const TPixel denominator = std::norm(H) + (Pn / (Pf - Pn));
+      if (itk::Math::Absolute(denominator) >= m_KernelZeroMagnitudeThreshold)
+      {
+        value = I * (std::conj(H) / denominator);
+      }
     }
 
     return value;

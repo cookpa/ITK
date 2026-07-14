@@ -30,6 +30,7 @@
 #include "itkSpatialNeighborSubsampler.h"
 #include "itkMacro.h"
 #include "itkMath.h"
+#include <algorithm> // For clamp and copy.
 
 namespace itk
 {
@@ -2075,6 +2076,14 @@ PatchBasedDenoisingImageFilter<TInputImage, TOutputImage>::ThreadedComputeImageU
       // this->ApplyUpdate() will then copy the results to outputIt since we
       // have to wait until all threads have finished using outputIt to
       // compute the update
+      for (unsigned int pc = 0; pc < m_NumPixelComponents; ++pc)
+      {
+        // Clamp to the representable range: the float-to-integer conversion of an
+        // out-of-range update is undefined behavior.
+        const auto lowest = static_cast<RealValueType>(NumericTraits<PixelValueType>::NonpositiveMin());
+        const auto highest = static_cast<RealValueType>(NumericTraits<PixelValueType>::max());
+        this->SetComponent(result, pc, std::clamp(this->GetComponent(result, pc), lowest, highest));
+      }
       updateIt.Set(static_cast<PixelType>(result));
 
       ++updateIt;

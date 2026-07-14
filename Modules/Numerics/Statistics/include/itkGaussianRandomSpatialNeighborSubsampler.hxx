@@ -48,14 +48,14 @@ GaussianRandomSpatialNeighborSubsampler<TSample, TRegion>::GetIntegerVariate(Ran
     itkExceptionMacro("upperBound (" << upperBound << ") not >= to lowerBound(" << lowerBound << ')');
   }
 
-  RandomIntType randInt = 0;
-
+  // Reject out-of-bound variates before the integer conversion: converting a
+  // negative value to an unsigned type is undefined behavior.
+  RealType floorVar = 0;
   do
   {
-    const RealType randVar = this->m_RandomNumberGenerator->GetNormalVariate(mean, m_Variance);
-    randInt = static_cast<RandomIntType>(std::floor(randVar));
-  } while ((randInt < lowerBound) || (randInt > upperBound));
-  return randInt;
+    floorVar = std::floor(this->m_RandomNumberGenerator->GetNormalVariate(mean, m_Variance));
+  } while ((floorVar < static_cast<RealType>(lowerBound)) || (floorVar > static_cast<RealType>(upperBound)));
+  return static_cast<RandomIntType>(floorVar);
 }
 
 template <typename TSample, typename TRegion>

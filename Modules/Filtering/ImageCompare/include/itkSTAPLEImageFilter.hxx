@@ -73,6 +73,8 @@ STAPLEImageFilter<TInputImage, TOutputImage>::GenerateData()
   {
     last_p[i] = -10.0;
     last_q[i] = -10.0;
+    p[i] = 1.0;
+    q[i] = 1.0;
   }
 
   // Come up with an initial Wi which is simply the average of
@@ -158,8 +160,14 @@ STAPLEImageFilter<TInputImage, TOutputImage>::GenerateData()
         out.NextLine();
       }
 
-      p[i] = p_num / p_denom;
-      q[i] = q_num / q_denom;
+      if (p_denom != 0.0)
+      {
+        p[i] = p_num / p_denom;
+      }
+      if (q_denom != 0.0)
+      {
+        q[i] = q_num / q_denom;
+      }
     }
 
     // Now recreate W using the new p's and q's

@@ -7,7 +7,11 @@ set(
 
 createtestdriver(ITKBiasCorrection "${ITKBiasCorrection-Test_LIBRARIES}" "${ITKBiasCorrectionTests}")
 
-set(ITKBiasCorrectionGTests itkCompositeValleyFunctionGTest.cxx)
+set(
+  ITKBiasCorrectionGTests
+  itkCompositeValleyFunctionGTest.cxx
+  itkN4BiasFieldCorrectionImageFilterGTest.cxx
+)
 
 creategoogletestdriver(ITKBiasCorrection "${ITKBiasCorrection-Test_LIBRARIES}" "${ITKBiasCorrectionGTests}")
 

@@ -38,6 +38,7 @@ ITK_GCC_SUPPRESS_Wfloat_equal
 #include "vnl/vnl_complex_traits.h"
 #include "complex"
 #include "itkPrintHelper.h"
+#include <algorithm> // For clamp and copy.
 ITK_GCC_PRAGMA_POP
 
 namespace itk
@@ -285,11 +286,19 @@ N4BiasFieldCorrectionImageFilter<TInputImage, TMaskImage, TOutputImage>::Sharpen
       {
         binMaximum = pixel;
       }
-      else if (pixel < binMinimum)
+      if (pixel < binMinimum)
       {
         binMinimum = pixel;
       }
     }
+  }
+  if (binMaximum <= binMinimum)
+  {
+    // Degenerate intensity range: sharpening is an identity mapping.
+    const ImageBufferRange identityImageBufferRange{ *sharpenedImage };
+    std::copy(
+      unsharpenedImageBufferRange.cbegin(), unsharpenedImageBufferRange.cend(), identityImageBufferRange.begin());
+    return;
   }
   const RealType histogramSlope = (binMaximum - binMinimum) / static_cast<RealType>(this->m_NumberOfHistogramBins - 1);
 

@@ -385,17 +385,16 @@ LabelOverlapMeasuresImageFilter<TLabelImage>::GetFalsePositiveError(LabelType la
     return 0.0;
   }
 
-  RealType value;
-  if (Math::ExactlyEquals(mapIt->second.m_Source, 0.0))
+  RealType   value;
+  const auto nComplementIntersection = nVox - mapIt->second.m_Union; // TN
+  const auto denominator = mapIt->second.m_SourceComplement + nComplementIntersection;
+  if (denominator == 0)
   {
     value = NumericTraits<RealType>::max();
   }
   else
   {
-    auto nComplementIntersection = nVox - mapIt->second.m_Union; // TN
-
-    value = static_cast<RealType>(mapIt->second.m_SourceComplement) /
-            static_cast<RealType>(mapIt->second.m_SourceComplement + nComplementIntersection);
+    value = static_cast<RealType>(mapIt->second.m_SourceComplement) / static_cast<RealType>(denominator);
   }
 
   return value;

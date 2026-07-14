@@ -150,7 +150,8 @@ StructureTensorImageFilter<TImage, TTensorImage>::GenerateData()
 
   traceFilter->Update();
   maximumCalculator->ComputeMaximum();
-  m_PostRescaling = 1. / maximumCalculator->GetMaximum();
+  const auto maximum = maximumCalculator->GetMaximum();
+  m_PostRescaling = (maximum > 0.) ? 1. / maximum : 1.;
   scaleFilter->GetFunctor().scaling = m_PostRescaling;
   scaleFilter->Update();
   this->GraftOutput(scaleFilter->GetOutput());

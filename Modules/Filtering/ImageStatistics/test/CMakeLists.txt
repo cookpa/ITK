@@ -467,6 +467,7 @@ itk_add_test(
 
 set(
   ITKImageStatisticsGTests
+  itkAdaptiveHistogramEqualizationImageFilterGTest.cxx
   itkLabelOverlapMeasuresImageFilterGTest.cxx
   itkMinimumMaximumImageFilterGTest.cxx
 )
