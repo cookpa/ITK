@@ -19,7 +19,7 @@
 #define itkSimilarity3DTransform_hxx
 
 #include "itkMath.h"
-#include "vnl/vnl_det.h"
+#include "itkMathDeterminant.h"
 #include "itkPrintHelper.h"
 
 namespace itk
@@ -85,7 +85,7 @@ Similarity3DTransform<TParametersValueType>::SetMatrix(const MatrixType & matrix
   // multiplied by the scale factor, then its determinant
   // must be equal to the cube of the scale factor.
   //
-  const double det = vnl_det(matrix.GetVnlMatrix());
+  const double det = Math::Determinant(matrix.GetVnlMatrix());
 
   if (det == 0.0)
   {
@@ -290,7 +290,7 @@ Similarity3DTransform<TParametersValueType>::ComputeMatrixParameters()
 {
   MatrixType matrix = this->GetMatrix();
 
-  m_Scale = itk::Math::cbrt(vnl_det(matrix.GetVnlMatrix()));
+  m_Scale = itk::Math::cbrt(Math::Determinant(matrix.GetVnlMatrix()));
 
   matrix /= m_Scale;
 

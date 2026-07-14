@@ -19,6 +19,7 @@
 #define itkExtractImageFilter_hxx
 
 #include "itkImageAlgorithm.h"
+#include "itkMathDeterminant.h"
 #include "itkObjectFactory.h"
 #include "itkProgressReporter.h"
 
@@ -193,7 +194,7 @@ ExtractImageFilter<TInputImage, TOutputImage>::GenerateOutputInformation()
       break;
       case DirectionCollapseStrategyEnum::DIRECTIONCOLLAPSETOSUBMATRIX:
       {
-        if (vnl_determinant(outputDirection.GetVnlMatrix()) == 0.0)
+        if (Math::Determinant(outputDirection.GetVnlMatrix()) == 0.0)
         {
           itkExceptionStringMacro("Invalid submatrix extracted for collapsed direction.");
         }
@@ -201,7 +202,7 @@ ExtractImageFilter<TInputImage, TOutputImage>::GenerateOutputInformation()
       break;
       case DirectionCollapseStrategyEnum::DIRECTIONCOLLAPSETOGUESS:
       {
-        if (vnl_determinant(outputDirection.GetVnlMatrix()) == 0.0)
+        if (Math::Determinant(outputDirection.GetVnlMatrix()) == 0.0)
         {
           outputDirection.SetIdentity();
         }

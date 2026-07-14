@@ -17,7 +17,6 @@
  *=========================================================================*/
 #ifndef itkTriangleCell_hxx
 #define itkTriangleCell_hxx
-#include "vnl/algo/vnl_determinant.h"
 
 #include <algorithm> // For copy_n.
 #include <cmath>     // For abs.
